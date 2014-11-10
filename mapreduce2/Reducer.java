@@ -1,22 +1,33 @@
-package mapreduce;
+package mapreduce2;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import lib.output.RecordWriter;
 
-public abstract class Reducer<K2, V2, K3, V3> {
+public abstract class Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
     
-	private Reducer<K2, V2, K3, V3>.Context context;
+	public void setup(Context context) { }
 	
-//	void reduce(K2 key, Iterator<V2> values, OutputCollector<K3,V3> output, Reporter reporter) throws IOException {
-//		
-//	}
+	public void cleanup(Context context) throws IOException { }
 	
-	public class Context extends ReduceContext<K2, V2, K3, V3> {
+	public abstract void reduce(KEYIN key, VALUEIN value, Context context) throws IOException;
+	
+	public void run(Context context) throws IOException { 
+		setup(context);
+		while(context.nextKeyValue()) {
+			reduce(context.getCurrentKey(), context.getCurrentValue(), context);
+		}
+		cleanup(context);
+	} 
+	
+	public class Context extends ReduceContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 		
-		public Context(RecordWriter<K3, V3> writer) throws IOException {
+		public Context(RecordWriter<KEYOUT, VALUEOUT> writer) throws IOException {
 			super(writer);
+		}
+		
+		public void write(KEYOUT key, VALUEOUT value) throws IOException {
+			super.writer.write(key, value);
 		}
 	}
 }

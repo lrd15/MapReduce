@@ -1,4 +1,4 @@
-package mapreduce;
+package mapreduce2;
 
 import java.io.IOException;
 
@@ -7,7 +7,7 @@ import lib.output.RecordWriter;
 
 public class ReduceContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
-	private RecordWriter<KEYOUT,VALUEOUT> writer;
+	protected RecordWriter<KEYOUT,VALUEOUT> writer;
 	
 	public ReduceContext(RecordWriter<KEYOUT,VALUEOUT> writer) {
 		this.writer = writer;
