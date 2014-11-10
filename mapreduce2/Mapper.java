@@ -2,8 +2,9 @@ package mapreduce2;
 
 import java.io.IOException;
 
-import lib.input.*;
-import lib.output.*;
+import lib.input.RecordReader;
+import lib.output.RecordWriter;
+
 
 public abstract class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 	
@@ -23,15 +24,12 @@ public abstract class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 	
 	public class Context extends MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 	
-		public Context(RecordReader<KEYIN,VALUEIN> reader, 
-					   RecordWriter<KEYOUT,VALUEOUT> writer, 
-					   InputSplit split) throws IOException {
-			super(reader, writer, split);
+		public Context(RecordReader<KEYIN,VALUEIN> reader, RecordWriter<KEYOUT,VALUEOUT> writer) throws IOException {
+			super(reader, writer);
 		}
 		
 		public void write(KEYOUT key, VALUEOUT value) throws IOException {
 			super.writer.write(key, value);
 		}
 	}
-	
 }

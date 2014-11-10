@@ -14,28 +14,27 @@ public class FixedLengthRecordReader extends RecordReader<Long, String> {
 	
 	private Long key;
 	private String value;
-	private int recordLength;
+	private int recordSize;
 	
-	public FixedLengthRecordReader(InputSplit split) throws IOException {
-		FixedLengthInputSplit fis = (FixedLengthInputSplit)split;
-		Path path = fis.getPath();
+	public FixedLengthRecordReader(Path path, InputSplit split, int recordSize) throws IOException {
+		FileInputSplit fis = (FileInputSplit)split;
 		this.file = new RandomAccessFile(path.toFile(), "r");
 		
 		long start = fis.getStart();
 		file.seek(start);
-		long totalLength = fis.getTotalLength();
-		this.recordLength = fis.getRecordLength();
+		long totalLength = fis.getLength();
+		this.recordSize = recordSize;
 		
-		this.kstart = start / this.recordLength;
-		this.ktotal = totalLength / this.recordLength;
+		this.kstart = start / this.recordSize;
+		this.ktotal = totalLength / this.recordSize;
 		this.counter = 0;
 	}
 	
 	public boolean nextKeyValue() throws IOException {
-		//check if all lines are already read
+		//check if all data are read
 		if(ktotal == counter) return false;
 		
-		byte[] bytes = new byte[recordLength];
+		byte[] bytes = new byte[recordSize];
 		if (file.read(bytes) != -1) {
 			this.key = new Long(kstart+counter);
 			this.value = new String(bytes);

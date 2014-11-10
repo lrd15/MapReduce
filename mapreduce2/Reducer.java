@@ -4,9 +4,10 @@ import java.io.IOException;
 
 import lib.output.RecordWriter;
 
+
 public abstract class Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
     
-	public void setup(Context context) { }
+public void setup(Context context) { }
 	
 	public void cleanup(Context context) throws IOException { }
 	

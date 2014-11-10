@@ -4,9 +4,10 @@ import java.io.IOException;
 
 import lib.output.RecordWriter;
 
-
+//TODO
 public class ReduceContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
+	//protected RecordWriter<KEYOUT,VALUEOUT> writer;
 	protected RecordWriter<KEYOUT,VALUEOUT> writer;
 	
 	public ReduceContext(RecordWriter<KEYOUT,VALUEOUT> writer) {
@@ -32,5 +33,8 @@ public class ReduceContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
     public boolean nextKey() throws IOException {
     	return false;
     }
-
+    
+    public void write(KEYOUT key, VALUEOUT value) throws IOException {
+		this.writer.write(key, value);
+	}
 }

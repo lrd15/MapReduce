@@ -3,29 +3,30 @@ package lib.input;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import mapreduce.JobConfig;
 
 public class FixedLengthInputFormat extends InputFormat<Long, String> {
 
-	private int recordSize;
-	private Path inputPath;
+	static private Path inputPath;
+	static private int recordSize;
 	
-	public FixedLengthInputFormat(int recordSize, Path path) {
-		this.recordSize = recordSize;
-		this.inputPath = path;
+	public FixedLengthInputFormat() { }
+	
+	static public void setRecordSize(int size) {
+		recordSize = size;
+	}
+	
+	static public void setInputPath(Path path) {
+		inputPath = path;
 	}
 	
 	@Override
 	public RecordReader<Long, String> getRecordReader(InputSplit split) throws IOException {
-		return new FixedLengthRecordReader(split);
+		return new FixedLengthRecordReader(this.inputPath, split, this.recordSize);
 	}
 
 	@Override
-	public InputSplit[] getSplits(JobConfig job, int numSplits) throws IOException {
+	public InputSplit[] getSplits(int numSplits) throws IOException {
+		//TODO
 		return null;
-	}
-	
-	public int getRecordSize() {
-		return this.recordSize;
 	}
 }
