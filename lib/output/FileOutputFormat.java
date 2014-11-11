@@ -2,27 +2,22 @@ package lib.output;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashMap;
+
+import config.Job;
 
 
 public class FileOutputFormat extends OutputFormat<String, String> {
 
-	//static private Job job;
-	static private Path outputPath;
-	private char delimiter = ',';
+	static private HashMap<Job, Path> job2Path = new HashMap<Job, Path>();
 	
-	public FileOutputFormat() { }
-	
-	static public void setOutputPath(Path path) {
-		outputPath = path;
+	static public void addInputPaths(Job job, Path path) {
+		job2Path.put(job, path);
 	}
 	
 	@Override
-	public RecordWriter<String, String> getRecordWriter() throws IOException {
-		return new FileRecordWriter(outputPath, delimiter);
-	}
-	
-	public void setDelimiter(char delimiter) {
-		this.delimiter = delimiter;
+	public RecordWriter<String, String> getRecordWriter(Job job, String outputFileName) throws IOException {
+		return new FileRecordWriter(job2Path.get(job), outputFileName);
 	}
 	
 }

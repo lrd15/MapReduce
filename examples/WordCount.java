@@ -1,6 +1,8 @@
 package examples;
 
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.StringTokenizer;
 
@@ -15,7 +17,7 @@ public class WordCount {
 
 	public static class TokenizerMapper extends Mapper<Object, String, String, String> {
 
-		public void map(Object key, String value, Context context) throws IOException {
+		public void map(Object key, String value, MapContext context) throws IOException {
 			StringTokenizer itr = new StringTokenizer(value.toString());
 			while (itr.hasMoreTokens()) {
 				context.write(itr.nextToken(), "1");
@@ -23,9 +25,9 @@ public class WordCount {
 		}
 	}
 
-	public static class IntSumReducer extends Reducer<String, Iterable<Integer>, String, String> {
-
-		public void reduce(String key, Iterable<Integer> values, Context context) throws IOException {
+	public static class IntSumReducer extends Reducer<String, Integer, String, String> {
+		// ??
+		public void reduce(String key, Iterable<Integer> values, ReduceContext<String, Integer, String, String> context) throws IOException {
 			int sum = 0;
 			for (Integer val : values) {
 				sum += val;
@@ -35,22 +37,30 @@ public class WordCount {
 	}
 
 	public static void main(String[] args) throws Exception {
-		int recordSize = 10;
-		FixedLengthInputFormat.setRecordSize(recordSize);
-		FixedLengthInputFormat.setInputPath(Paths.get(args[0]));
-		FileOutputFormat.setOutputPath(Paths.get(args[1]));
+		//TODO: hard code here
+		Path path1 = FileSystems.getDefault().getPath("./test/input1");
+		Path path2 = FileSystems.getDefault().getPath("./test/");
 		
 		Configuration conf = new Configuration();
 		Job job = Job.getInstance(conf, "word count");
 		
 		//job.setJarByClass(WordCount.class);
 		job.setMapperClass(TokenizerMapper.class);
-		job.setCombinerClass(IntSumReducer.class);
+		//job.setCombinerClass(IntSumReducer.class);
 		job.setReducerClass(IntSumReducer.class);
-		job.setOutputKeyClass(String.class);
-		job.setOutputValueClass(Integer.class);
-		job.setInputFormatClass(FixedLengthInputFormat.class);
-		job.setOutputFormatClass(FileOutputFormat.class);
+		//job.setOutputKeyClass(String.class);
+		//job.setOutputValueClass(Integer.class);
+		job.setRecordSize(11);
+		job.setNumOfReduceJobs(1);
+		//job.setNumOfMapJobs(1);
+		//setPartitionerClass
+		
+		FixedLengthInputFormat.addInputPaths(job, path1); 
+		job.setInputFormatClass(FixedLengthInputFormat.class); //for mapper
+
+		FileOutputFormat.addInputPaths(job, path2);
+		job.setOutputFormatClass(FileOutputFormat.class); //for reducer
+		
 		job.submit();
 		
 	}

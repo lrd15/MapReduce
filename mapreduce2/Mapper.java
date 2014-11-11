@@ -2,34 +2,22 @@ package mapreduce2;
 
 import java.io.IOException;
 
-import lib.input.RecordReader;
-import lib.output.RecordWriter;
-
 
 public abstract class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 	
-	public void setup(Context context) { }
+	public void setup(MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> context) { }
 	
-	public void cleanup(Context context) throws IOException { }
+	public void cleanup(MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> context) throws IOException { 
+		context.close();
+	}
 	
-	public abstract void map(KEYIN key, VALUEIN value, Context context) throws IOException;
+	public abstract void map(KEYIN key, VALUEIN value, MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> context) throws IOException;
 	
-	public void run(Context context) throws IOException { 
+	public void run(MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> context) throws IOException { 
 		setup(context);
 		while(context.nextKeyValue()) {
             map(context.getCurrentKey(), context.getCurrentValue(), context);
 		}
 		cleanup(context);
 	} 
-	
-	public class Context extends MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
-	
-		public Context(RecordReader<KEYIN,VALUEIN> reader, RecordWriter<KEYOUT,VALUEOUT> writer) throws IOException {
-			super(reader, writer);
-		}
-		
-		public void write(KEYOUT key, VALUEOUT value) throws IOException {
-			super.writer.write(key, value);
-		}
-	}
 }

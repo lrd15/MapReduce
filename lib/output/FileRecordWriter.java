@@ -8,22 +8,19 @@ import java.nio.file.Path;
 public class FileRecordWriter extends RecordWriter<String, String> {
 
 	private PrintWriter writer = null;
-	private char delimiter;
+	private char delimiter = ',';
 	
-	public FileRecordWriter(Path filePath, char delimiter) {
+	public FileRecordWriter(Path filePath, String outputFileName) {
 		try {
-			this.writer =  new PrintWriter(filePath.toString());
+			this.writer =  new PrintWriter(filePath.toString()+outputFileName);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		this.delimiter = delimiter;
 	}
 	
 	@Override
 	public void write(String key, String value) throws IOException {
-		this.writer.print(key);
-		this.writer.print(delimiter);
-		this.writer.print(value);
+		this.writer.println(key + delimiter + value);
 	}
 
 	@Override

@@ -2,16 +2,20 @@ package mapreduce2;
 
 import java.io.IOException;
 
+import config.Configuration;
+
 import lib.input.RecordReader;
 import lib.output.*;
 
 
 public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
-	protected RecordReader<KEYIN, VALUEIN> reader;
-	protected RecordWriter<KEYOUT, VALUEOUT> writer;
+	private Configuration config;
+	private RecordReader<KEYIN, VALUEIN> reader;
+	private RecordWriter<KEYOUT, VALUEOUT> writer;
 
-    public MapContext(RecordReader<KEYIN,VALUEIN> reader, RecordWriter<KEYOUT,VALUEOUT> writer) {
+    public MapContext(Configuration config, RecordReader<KEYIN,VALUEIN> reader, RecordWriter<KEYOUT,VALUEOUT> writer) {
+    	this.config = config;
     	this.reader = reader;
     	this.writer = writer;
     }
@@ -29,6 +33,13 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
     }
     
     public void write(KEYOUT key, VALUEOUT value) throws IOException {
-		this.writer.write(key, value);
+		//TODO sort
+    	this.writer.write(key, value);
 	}
+    
+    public void close() throws IOException {
+		this.writer.close();
+		this.reader.close();
+	}
+   
 }
