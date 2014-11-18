@@ -1,25 +1,33 @@
 import java.io.*;
 import java.net.Socket;
 public class WorkerHandler extends Thread {
+    public static final int MAP_JOB = 1;
+    public static final int REDUCE_JOB = 2;
+    public static final int NONE = 0;
     private int id;
     private boolean alive;
     private Socket socket;
-    private DataInputStream fromWorker;
-    private DataOutputStream toWorker;
+    private ObjectInputStream fromWorker;
+    private ObjectOutputStream toWorker;
 
     private Configuration conf;
 
-    private State state;
+    private WorkerState state;
+
+    private int jobId, idx, status;
 
     public WorkerHandler(Configuration conf, int id, Socket socket) throws IOException {
         this.id = id;
         this.socket = socket;
         this.conf = conf;
         alive = true;
-        state = State.IDLE;
+        state = WorkerState.IDLE;
+        jobId = idx = -1;
+        status = NONE;
+
         this.socket = socket;
-        fromWorker = new DataInputStream(socket.getInputStream());
-        toWorker = new DataOutputStream(socket.getOutputStream());
+        fromWorker = new ObjectInputStream(socket.getInputStream());
+        toWorker = new ObjectOutputStream(socket.getOutputStream());
     }
 
     @Override
@@ -27,8 +35,10 @@ public class WorkerHandler extends Thread {
         socket.setSoTimeout(conf.TIMEOUT); // Set timeout in ms
         while (true) {
             try {
-                int signal = fromWorker.readInt();
-                switch (signal) {
+                Object obj = fromWorker.readObject();
+                if (obj instanceof Signal) {
+                    Signal sig = (Signal)obj;
+                    switch (sig.getSignal()) {
                     case Signal.HEARTBEAT:
                         alive = true;
                         break;
@@ -39,33 +49,60 @@ public class WorkerHandler extends Thread {
                         // Code here
                         break;
                 }
+                }
             } catch (SocketTimeoutException e) { // Timeout -> tracker dies
                 alive = false;
             }
         }
     }
 
+    synchronized public Object readObject() {
+        return fromWorker.readObject();
+    }
+
+    synchronized public void writeObject(Object obj) {
+        toWorker.writeObject(obj);
+    }
+
+    public void setJobStatus(int status, int jobId, int idx) {
+        this.status = status;
+        this.jobId = jobId;
+        this.idx = idx;
+    }
+
+    public int getJobStatus() {
+        return status;
+    }
+
+    public int getJobId() {
+        return jobId;
+    }
+
+    public int getIdx() {
+        return idx;
+    }
+
     public Socket getSocket() {
         return socket;
     }
 
-    public void setStateToBusy() {
-        state = State.BUSY;
+    public WorkerState getState() {
+        return state;
     }
 
-    public void setStateToIdle() {
-        state = State.IDLE;
+    public void setState(WorkerState s) {
+        state = s;
     }
 
     public boolean isIdle() {
-        return state == State.IDLE;
+        return state == WorkerState.IDLE;
     }
 
     public boolean isAlive() {
         return alive;
     }
 
-    private enum State {
-        IDLE, BUSY
+    public int getId() {
+        return id;
     }
 }

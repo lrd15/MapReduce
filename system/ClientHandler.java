@@ -3,8 +3,8 @@ import java.net.Socket;
 public class ClientHandler extends Thread {
     private int id;
     private Socket socket;
-    private DataInputStream fromClient;
-    private DataOutputStream toClient;
+    private ObjectInputStream fromClient;
+    private ObjectOutputStream toClient;
 
     private Configuration conf;
 
@@ -13,7 +13,7 @@ public class ClientHandler extends Thread {
         this.socket = socket;
         this.conf = conf;
         this.socket = socket;
-        fromClient = new DataInputStream(socket.getInputStream());
-        toClient = new DataOutputStream(socket.getOutputStream());
+        fromClient = new ObjectInputStream(socket.getInputStream());
+        toClient = new ObjectOutputStream(socket.getOutputStream());
     }
 }
