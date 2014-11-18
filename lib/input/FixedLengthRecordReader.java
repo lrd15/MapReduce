@@ -16,8 +16,9 @@ public class FixedLengthRecordReader extends RecordReader<Long, String> {
 	private String value;
 	private int recordSize;
 	
-	public FixedLengthRecordReader(Path path, InputSplit split, int recordSize) throws IOException {
+	public FixedLengthRecordReader(InputSplit split, int recordSize) throws IOException {
 		FileInputSplit fis = (FileInputSplit)split;
+		Path path = fis.getFile();
 		this.file = new RandomAccessFile(path.toFile(), "r");
 		
 		long start = fis.getStart();
@@ -32,7 +33,7 @@ public class FixedLengthRecordReader extends RecordReader<Long, String> {
 	
 	public boolean nextKeyValue() throws IOException {
 		//check if all data are read
-		if(ktotal == counter) {
+		if(ktotal >= counter) {
 			this.key = null;
 			this.value = null;
 			return false;

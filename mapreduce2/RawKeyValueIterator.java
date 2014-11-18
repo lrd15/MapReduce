@@ -5,5 +5,6 @@ import java.io.IOException;
 public interface RawKeyValueIterator<KEYIN, VALUEIN> {
 	public KEYIN getKey();
 	public Iterable<VALUEIN> getValue() throws IOException;
-	public boolean next();
+	public boolean next() throws IOException;
+	public void close() throws IOException;
 }
