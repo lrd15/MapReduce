@@ -68,7 +68,12 @@ public class JobClient {
 		File folder = new File(inputPath.toUri());
 		File[] files = folder.listFiles();
 		splitAndSend(files, toWorkers, fromWorkers);
-		//TODO: close
+		for(ObjectOutputStream oos : toWorkers) {
+			oos.close();
+		}
+		for(ObjectInputStream ois : fromWorkers) {
+			ois.close();
+		}
 	}
 
 	private void acknowledgeMaster() throws IOException {
