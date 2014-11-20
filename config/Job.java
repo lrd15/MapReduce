@@ -76,19 +76,19 @@ public class Job implements JobContext {
 		this.partitionerClass = partitionerClass;
 	}
 	
-	public Class getPartitionerClass() {
+	public Class<?> getPartitionerClass() {
 		return this.partitionerClass;
 	}
 
-	public void setInputFormatClass(Class inputFormatClass) {
+	public void setInputFormatClass(Class<?> inputFormatClass) {
 		this.inputFormatClass = inputFormatClass;
 	}
 	
-	public Class getInputFormatClass() {
+	public Class<?> getInputFormatClass() {
 		return this.inputFormatClass;
 	}
 	
-	public void setOutputFormatClass(Class outputFormatClass) {
+	public void setOutputFormatClass(Class<?> outputFormatClass) {
 		this.outputFormatClass = outputFormatClass;
 	}
 	
@@ -120,18 +120,6 @@ public class Job implements JobContext {
 		return this.outputPath;
 	}
 	
-//	public void setNumOfReduceJobs(int tasks) {
-//		this.numOfReduceJobs = tasks;
-//	}
-//	
-//	public int getNumOfReduceJobs() {
-//		return this.numOfReduceJobs;
-//	}
-//	
-//	public void setNumOfMapJobs(int tasks) {
-//		this.numOfMapJobs = tasks;
-//	}
-	
 	public void setRecordSize(int recordSize) {
 		this.recordSize = recordSize;
 	}
@@ -140,7 +128,7 @@ public class Job implements JobContext {
 		return this.recordSize;
 	}
 	
-	public void submit() throws InstantiationException, IllegalAccessException, IOException {
+	public void submit() throws InstantiationException, IllegalAccessException, IOException, ClassNotFoundException {
 		new JobClient().submitJob(this);
 	}
 

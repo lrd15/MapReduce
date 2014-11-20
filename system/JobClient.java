@@ -23,8 +23,7 @@ public class JobClient {
 	public JobClient() {
 		Host master = Configuration.MASTER;
 		try {
-			Socket socket = new Socket(master.getIPAddress(),
-					master.getPortForClient());
+			Socket socket = new Socket(master.getIPAddress(), master.getPortForClient());
 			toMaster = new ObjectOutputStream(socket.getOutputStream());
 			fromMaster = new ObjectInputStream(socket.getInputStream());
 		} catch (IOException e) {
@@ -32,68 +31,48 @@ public class JobClient {
 		}
 	}
 
-	public void submitJob(Job job) {
+	public void submitJob(Job job) throws ClassNotFoundException, IOException, InstantiationException, IllegalAccessException {
 		this.job = job;
 		getJobIDFromMaster();
 		sendFilesToWorkers();
-		sendInputSplitsToMaster();
 		acknowledgeMaster();
+		sendInputSplitsToMaster();
 	}
 	
 	public void submitJobOnSingleNode(Job job) { }
 
-	private void getJobIDFromMaster() {
-		try {
-			toMaster.writeObject(new Signal(SigNum.ADD_JOB));
-			int jobID = (Integer) fromMaster.readObject();
-			this.job.setID(jobID);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+	private void getJobIDFromMaster() throws IOException, ClassNotFoundException {
+		toMaster.writeObject(new Signal(SigNum.ADD_JOB));
+		int jobID = (Integer) fromMaster.readObject();
+		this.job.setID(jobID);
 	}
 
-	private void sendInputSplitsToMaster() {
+	private void sendInputSplitsToMaster() throws InstantiationException, IllegalAccessException, IOException {
 		int numSplits = Configuration.NUM_OF_SPLITS;
 		InputFormat inputFormat = null;
 		InputSplit[] inputSplits = null;
-		try {
-			inputFormat = (InputFormat) job.getInputFormatClass().newInstance();
-			inputSplits = inputFormat.getSplits(job, numSplits);
-			toMaster.writeObject(inputSplits);
-		} catch (InstantiationException | IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		inputFormat = (InputFormat) job.getInputFormatClass().newInstance();
+		inputSplits = inputFormat.getSplits(job, numSplits);
+		toMaster.writeObject(inputSplits);
 	}
 
-	private void sendFilesToWorkers() {
+	private void sendFilesToWorkers() throws IOException {
 		ArrayList<ObjectOutputStream> toWorkers = new ArrayList<ObjectOutputStream>();
 		ArrayList<ObjectInputStream> fromWorkers = new ArrayList<ObjectInputStream>();
-		try {
-			for (Host worker : Configuration.WORKERS) {
-				Socket socket = new Socket(worker.getIPAddress(), worker.getPortForClient());
-				toWorkers.add(new ObjectOutputStream(socket.getOutputStream()));
-				fromWorkers.add(new ObjectInputStream(socket.getInputStream()));
-			}
-			Path inputPath = job.getInputPath();
-			File folder = new File(inputPath.toUri());
-			File[] files = folder.listFiles();
-			splitAndSend(files, toWorkers, fromWorkers);
-			//TODO: close
-		} catch (IOException e) {
-			e.printStackTrace();
+		for (Host worker : Configuration.WORKERS) {
+			Socket socket = new Socket(worker.getIPAddress(), worker.getPortForClient());
+			toWorkers.add(new ObjectOutputStream(socket.getOutputStream()));
+			fromWorkers.add(new ObjectInputStream(socket.getInputStream()));
 		}
+		Path inputPath = job.getInputPath();
+		File folder = new File(inputPath.toUri());
+		File[] files = folder.listFiles();
+		splitAndSend(files, toWorkers, fromWorkers);
+		//TODO: close
 	}
 
-	private void acknowledgeMaster() {
-		try {
-			toMaster.writeObject(new Signal(SigNum.ADD_JOB_COMPLETED));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	private void acknowledgeMaster() throws IOException {
+		toMaster.writeObject(new Signal(SigNum.ADD_JOB_COMPLETED));
 	}
 
 	private void splitAndSend(File[] files, ArrayList<ObjectOutputStream> toWorkers,
