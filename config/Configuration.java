@@ -94,7 +94,7 @@ public class Configuration {
 	}
 	
 	private static String getValue(String tag, Document document) {
-		return document.getElementsByTagName(tag).item(0).getNodeValue();
+		return document.getElementsByTagName(tag).item(0).getChildNodes().item(0).getNodeValue();
 	}
 	
 //	public static void main(String[] args) throws SAXException, IOException {
