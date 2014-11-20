@@ -7,8 +7,10 @@ public class ClientHandler extends Thread {
     private ObjectOutputStream toClient;
 
     private Configuration conf;
+    private JobTracker master;
 
-    public ClientHandler(Configuration conf, int id, Socket socket) throws IOException {
+    public ClientHandler(JobTracker master, Configuration conf, int id, Socket socket) throws IOException {
+        this.master = master;
         this.id = id;
         this.socket = socket;
         this.conf = conf;

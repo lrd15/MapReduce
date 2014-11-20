@@ -10,11 +10,17 @@ public class MapJob {
             jobSplits[i] = new MapJobSplit(splits[i]);
     }
 
-    public int getId() {
+    public int getID() {
         return id;
     }
 
     public MapJobSplit[] getSplits() {
         return jobSplits;
+    }
+
+    public MapJobSplit getSplit(int i) {
+        if (i < 0 || i >= jobSplits.length)
+            return null;
+        return jobSplits[i];
     }
 }

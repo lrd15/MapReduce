@@ -44,8 +44,11 @@ public class LineRecordReader extends RecordReader<String, String> {
 		}
 		
 		String line;
-		if ((line = file.readLine()) == null)
+		if ((line = file.readLine()) == null) {
+			this.key = null;
+			this.value = null;
 			return false;
+		}
 		
 		StringTokenizer tokenizer = new StringTokenizer(line);
 		this.key = tokenizer.nextToken();

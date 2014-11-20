@@ -15,6 +15,7 @@ public class StringStringIterator implements RawKeyValueIterator<String, String>
 
 	public StringStringIterator(Iterable<LineRecordReader> readers) throws IOException {
 		this.readers = readers;
+		this.keyPool = new ArrayList<String>();
 		getInitialKeys();
 	}
 

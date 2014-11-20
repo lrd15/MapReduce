@@ -1,3 +1,6 @@
+import java.io.*;
+import java.util.ArrayList;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.InetAddress;
 
@@ -6,11 +9,11 @@ public class TaskTracker extends Thread {
     private ArrayList<TaskTrackerClientHandler> clientHandlerList;
 
     private Socket socket;
-    private DataInputStream fromHandler;
-    private DataOutputStream toHandler;
+    private ObjectInputStream fromHandler;
+    private ObjectOutputStream toHandler;
 
-    private int nextClientId;
-    private int nextWorkerId;
+    private int nextClientID;
+    private int nextWorkerID;
 
     private boolean running;
 
@@ -19,8 +22,8 @@ public class TaskTracker extends Thread {
     private ServerSocket clientServerSocket, workerServerSocket;
 
     public TaskTracker(Configuration conf) throws Exception {
-        nextClientId = 0;
-        nextWorkerId = 0;
+        nextClientID = 0;
+        nextWorkerID = 0;
         running = true;
         this.conf = conf;
         Host self = conf.getWorkerByAddress(InetAddress.getLocalHost().getHostAddress());
@@ -32,8 +35,8 @@ public class TaskTracker extends Thread {
 
 
         socket = new Socket(conf.getMaster().getAddress(), conf.getMaster().getWorkerPort());
-        fromHandler = new DataInputStream(socket.getInputStream());
-        toHandler = new DataOutputStream(socket.getOutputStream());
+        fromHandler = new ObjectInputStream(socket.getInputStream());
+        toHandler = new ObjectOutputStream(socket.getOutputStream());
 
         ClientListener clientListener = new ClientListener();
         clientListener.start();
@@ -101,7 +104,7 @@ public class TaskTracker extends Thread {
             while (running) {
                 try {
                     Socket socket = clientServerSocket.accept();
-                    TaskTrackerClientHandler clientHandler = new TaskTrackerClientHandler(conf, nextClientId++, socket);
+                    TaskTrackerClientHandler clientHandler = new TaskTrackerClientHandler(conf, nextClientID++, socket);
                     clientHandlerList.add(clientHandler);
                     System.out.println("New client connected: " + socket.getRemoteSocketAddress());
                 } catch (IOException e) {
@@ -117,7 +120,7 @@ public class TaskTracker extends Thread {
             while (running) {
                 try {
                     Socket socket = workerServerSocket.accept();
-                    TaskTrackerWorkerHandler workerHandler = new TaskTrackerWorkerHandler(conf, nextWorkerId++, socket);
+                    TaskTrackerWorkerHandler workerHandler = new TaskTrackerWorkerHandler(conf, nextWorkerID++, socket);
                     workerHandlerList.add(workerHandler);
                     System.out.println("New worker connected: " + socket.getRemoteSocketAddress());
                 } catch (IOException e) {

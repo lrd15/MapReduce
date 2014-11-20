@@ -1,3 +1,5 @@
+import java.net.InetAddress;
+
 public class Host {
     private InetAddress address;
     private int clientPort, workerPort;

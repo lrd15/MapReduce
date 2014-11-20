@@ -1,31 +1,39 @@
 package config;
 
-import java.lang.reflect.Constructor;
+import java.io.IOException;
+import java.nio.file.Path;
 
-import lib.input.InputFormat;
-import lib.input.InputSplit;
-import lib.input.RecordReader;
-import lib.output.OutputFormat;
-import lib.output.RecordWriter;
-import mapreduce2.Mapper;
+import system.JobClient;
 
 
-public class Job {
+public class Job implements JobContext {
 	
 	private Configuration config;
 	private String identifier;
 	
 	private Class mapperClass;
 	private Class combinerClass;
+	private Class partitionerClass;
 	private Class reducerClass;
+	
 	private Class outputKeyClass;
 	private Class outputValueClass;
+	
 	private Class inputFormatClass;
 	private Class outputFormatClass;
 
+	private Path inputPath;
+	private Path outputPath;
+	
 	private int numOfReduceJobs;
+	private int numOfMapJobs;
+	private int recordSize;
+	
+	private JobClient jobclient;
 	
 	private Job(Configuration config, String identifier) { 
+		//Configuration.addDefaultResource("");
+		this.jobclient = new JobClient();
 		this.config = config;
 		this.identifier = identifier;
 	}
@@ -38,6 +46,10 @@ public class Job {
 		this.mapperClass = mapperClass;
 	}
 	
+	public Class getMapperClass() {
+		return this.mapperClass;
+	}
+	
 	public void setCombinerClass(Class combinerClass) {
 		this.combinerClass = combinerClass;
 	}
@@ -46,12 +58,32 @@ public class Job {
 		this.reducerClass = reducerClass;
 	}
 	
+	public Class getReducerClass() {
+		return this.reducerClass;
+	}
+	
+	public void setPartitionerClass(Class partitionerClass) {
+		this.partitionerClass = partitionerClass;
+	}
+	
+	public Class getPartitionerClass() {
+		return this.partitionerClass;
+	}
+
 	public void setInputFormatClass(Class inputFormatClass) {
 		this.inputFormatClass = inputFormatClass;
 	}
 	
+	public Class getInputFormatClass() {
+		return this.inputFormatClass;
+	}
+	
 	public void setOutputFormatClass(Class outputFormatClass) {
 		this.outputFormatClass = outputFormatClass;
+	}
+	
+	public Class getOutputFormatClass() {
+		return this.outputFormatClass;
 	}
 	
 	public void setOutputKeyClass(Class outputKeyClass) {
@@ -62,41 +94,40 @@ public class Job {
 		this.outputValueClass = outputValueClass;
 	}
 	
+	public void setInputPath(Path path) {
+		this.inputPath = path;
+	}
+	
+	public void setOutputPath(Path path) {
+		this.outputPath = path;
+	}
+	
+	public Path getInputPath() {
+		return this.inputPath;
+	}
+	
+	public Path getOutputPath() {
+		return this.outputPath;
+	}
+	
 	public void setNumOfReduceJobs(int tasks) {
 		this.numOfReduceJobs = tasks;
 	}
 	
-	public void submit() {
-		try {
-			int numSplits = 10; //TODO: hard code here
-			
-			Class<?> ifClass = this.inputFormatClass.getClass();
-			InputFormat inputFormat = (InputFormat)ifClass.getConstructor().newInstance();
-			
-			Class<?> ofClass = this.outputFormatClass.getClass();
-			OutputFormat outputFormat = (OutputFormat)ofClass.getConstructor().newInstance();
-			
-			//map
-			Class<?> mapperClass = this.mapperClass.getClass();
-			Class[] mcontextClass = mapperClass.getDeclaredClasses(); //Mapper.Context
-			Constructor mcontextCstr = mcontextClass[0].getConstructor(RecordReader.class, RecordWriter.class);
-			InputSplit[] inputSplits = inputFormat.getSplits(numSplits); 
-			for(InputSplit split : inputSplits) {
-				RecordReader reader = inputFormat.getRecordReader(split);
-				RecordWriter writer = outputFormat.getRecordWriter();
-				Mapper.Context context = (Mapper.Context)mcontextCstr.newInstance(reader, writer);
-				Mapper mapper = (Mapper)mapperClass.getConstructor().newInstance();
-				mapper.run(context); //TODO: threading
-			};
-
-			//reduce
-			Class<?> reducerClass = this.reducerClass.getClass();
-			for(int i=0; i<this.numOfReduceJobs; i++) {
-				//Reducer reducer = (Reducer)reducerClass.getConstructor().newInstance();
-				//reducer.run();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} 
+	public void setNumOfMapJobs(int tasks) {
+		this.numOfMapJobs = tasks;
 	}
+	
+	public void setRecordSize(int recordSize) {
+		this.recordSize = recordSize;
+	}
+	
+	public int getRecordSize() {
+		return this.recordSize;
+	}
+	
+	public void submit() throws InstantiationException, IllegalAccessException, IOException {
+		this.jobclient.submitJob(this);
+	}
+
 }

@@ -33,12 +33,12 @@ public class FixedLengthRecordReader extends RecordReader<Long, String> {
 	
 	public boolean nextKeyValue() throws IOException {
 		//check if all data are read
-		if(ktotal >= counter) {
+		if(ktotal <= counter) {
 			this.key = null;
 			this.value = null;
 			return false;
 		}
-		
+
 		byte[] bytes = new byte[recordSize];
 		if (file.read(bytes) != -1) {
 			this.key = new Long(kstart+counter);

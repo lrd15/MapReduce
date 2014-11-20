@@ -7,12 +7,13 @@ public class TaskTrackerClientHandler extends Thread {
     private ObjectOutputStream toClient;
 
     private Configuration conf;
+    boolean running;
 
     public TaskTrackerClientHandler(Configuration conf, int id, Socket socket) {
         this.id = id;
         this.socket = socket;
         this.conf = conf;
-
+        running = true;
         this.socket = socket;
         fromClient = new ObjectInputStream(socket.getInputStream());
         toClient = new ObjectOutputStream(socket.getOutputStream());

@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 public class WorkerHandler extends Thread {
     // Status codes
     public static final int MAP_JOB = 1;
@@ -13,18 +14,20 @@ public class WorkerHandler extends Thread {
     private ObjectOutputStream toWorker;
 
     private Configuration conf;
+    private JobTracker master;
 
     private WorkerState state;
 
-    private int jobId, idx, status;
+    private int jobID, idx, status;
 
-    public WorkerHandler(Configuration conf, int id, Socket socket) throws IOException {
+    public WorkerHandler(JobTracker master, Configuration conf, int id, Socket socket) throws IOException {
+        this.master = master;
         this.id = id;
         this.socket = socket;
         this.conf = conf;
         alive = true;
         state = WorkerState.IDLE;
-        jobId = idx = -1;
+        jobID = idx = -1;
         status = NONE;
 
         this.socket = socket;
@@ -41,15 +44,18 @@ public class WorkerHandler extends Thread {
                 if (obj instanceof Signal) {
                     Signal sig = (Signal)obj;
                     switch (sig.getSignal()) {
-                    case Signal.HEARTBEAT:
-                        alive = true;
-                        break;
-                    case Signal.MAP_COMPLETED:
-                        // Code here
-                        break;
-                    case Signal.REDUCE_COMPLETED:
-                        // Code here
-                        break;
+                        case Signal.HEARTBEAT:
+                            alive = true;
+                            break;
+                        case Signal.MAP_COMPLETED:
+                            // Code to get filenames
+                            MapJobSplit split = master.getMapJobSplit(jobID, idx);
+                            split.setJobState(JobState.COMPLETED);
+                            setWorkerState(WorkerState.IDLE);
+                            break;
+                        case Signal.REDUCE_COMPLETED:
+                            // Code here
+                            break;
                     }
                 }
             } catch (SocketTimeoutException e) { // Timeout -> tracker dies
@@ -66,9 +72,9 @@ public class WorkerHandler extends Thread {
         toWorker.writeObject(obj);
     }
 
-    public void setJobStatus(int status, int jobId, int idx) {
+    public void setJobStatus(int status, int jobID, int idx) {
         this.status = status;
-        this.jobId = jobId;
+        this.jobID = jobID;
         this.idx = idx;
     }
 
@@ -76,8 +82,8 @@ public class WorkerHandler extends Thread {
         return status;
     }
 
-    public int getJobId() {
-        return jobId;
+    public int getJobID() {
+        return jobID;
     }
 
     public int getIdx() {
@@ -88,11 +94,11 @@ public class WorkerHandler extends Thread {
         return socket;
     }
 
-    public WorkerState getState() {
+    public WorkerState getWorkerState() {
         return state;
     }
 
-    public void setState(WorkerState s) {
+    public void setWorkerState(WorkerState s) {
         state = s;
     }
 
@@ -100,11 +106,11 @@ public class WorkerHandler extends Thread {
         return state == WorkerState.IDLE;
     }
 
-    public boolean isAlive() {
+    public boolean alive() {
         return alive;
     }
 
-    public int getId() {
+    public int getID() {
         return id;
     }
 }

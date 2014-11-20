@@ -12,10 +12,10 @@ public class ReduceJob {
         numCompleted = 0;
         partitions = new ReducePartition[par.length];
         for (int i =  0; i < par.length; i++)
-            partitions = new ReducePartition(par);
+            partitions[i] = new ReducePartition(par[i]);
     }
 
-    public int getId() {
+    public int getID() {
         return id;
     }
 
@@ -45,7 +45,7 @@ public class ReduceJob {
 
     public int nextIdlePartitionIdx() {
         if (!hasNextIdlePartition())
-            return null;
+            return -1;
         while (partitions[curPartition].getState() != JobState.IDLE) {
             curPartition = (curPartition + 1) % partitions.length;
         }

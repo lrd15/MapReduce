@@ -1,17 +1,18 @@
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class JobTracker {
+public class JobTracker extends Thread {
     private ArrayList<WorkerHandler> workerHandlerList;
     private ArrayList<ClientHandler> clientHandlerList;
 
     private ArrayList<MapJob> mapJobList;
     private ArrayList<ReduceJob> reduceJobList;
 
-    private int nextClientId;
-    private int nextWorkerId;
+    private int nextClientID;
+    private int nextWorkerID;
 
     // Round Robin between map and reduce, and between jobs
     private int curMapJobIdx, curReduceJobIdx;
@@ -24,8 +25,8 @@ public class JobTracker {
     private Configuration conf;
 
     public JobTracker(Configuration config) {
-        nextClientId = 0;
-        nextWorkerId = 0;
+        nextClientID = 0;
+        nextWorkerID = 0;
         running = true;
         curMapJobIdx = curReduceJobIdx = 0;
         doMap = true;
@@ -62,15 +63,15 @@ public class JobTracker {
                             boolean mapCompleted = true;
                             for (int i = 0; i < splits.length; i++) {
                                 MapJobSplit split = splits[i];
-                                if (split.getState() != JobState.COMPLETED)
+                                if (split.getJobState() != JobState.COMPLETED)
                                     mapCompleted = false;
-                                if (split.getState() != JobState.IDLE)
+                                if (split.getJobState() != JobState.IDLE)
                                     continue;
                                 Host[] hosts = split.getInputSplit.getLocations();
                                 for (Host host : hosts) {
                                     WorkerHandler wh = getWorkerHandler(host);
                                     if (wh != null && wh.isIdle()) { // Found idle worker
-                                        initMap(wh, split, job.getId(), i);
+                                        initMap(wh, split, job.getID(), i);
                                         done = true;
                                         break;
                                     }
@@ -92,7 +93,7 @@ public class JobTracker {
                                 ReducePartition partition = job.getPartition(idx);
                                 for (WorkerHandler wh : workerHandlerList)
                                     if (wh.isIdle()) { // Found idle worker
-                                        initReduce(wh, partition, job.getId(), idx);
+                                        initReduce(wh, partition, job.getID(), idx);
                                         done = true;
                                         break;
                                     }
@@ -107,17 +108,25 @@ public class JobTracker {
         }
     }
 
+    public MapJobSplit getMapJobSplit(int jobID, int splitIdx) {
+        for (MapJob job : mapJobList)
+            if (job.getID() == jobID)
+                return job.getSplit(splitIdx);
+        return null;
+    }
+
     private void initMap(WorkerHandler wh, MapJobSplit split,
-            int jobId, int splitIdx) {
+            int jobID, int splitIdx) {
         wh.writeObject(new Signal(Signal.INIT_MAP));
         wh.writeObject(split.getInputSplit());
-        split.setState(JobState.IN_PROGRESS);
-        wh.setState(WorkerState.BUSY);
-        wh.setJobStatus(WorkerHandler.MAP_JOB, jobId, splitIdx);
+        split.setJobState(JobState.IN_PROGRESS);
+        split.setWorkerID(wh.getID());
+        wh.setWorkerState(WorkerState.BUSY);
+        wh.setJobStatus(WorkerHandler.MAP_JOB, jobID, splitIdx);
     }
 
     private void initReduce(WorkerHandler wh, ReducePartition partition,
-            int jobId, int partitionIdx) {
+            int jobID, int partitionIdx) {
 
     }
 
@@ -127,7 +136,7 @@ public class JobTracker {
             return;
         
         ReducePartition[] partitions;
-        ReduceJob reduceJob = new ReduceJob(mapJob.getId(), partitions);
+        ReduceJob reduceJob = new ReduceJob(mapJob.getID(), partitions);
         reduceJobList.add(reduceJob);
     }
 
@@ -180,13 +189,17 @@ public class JobTracker {
         return null;
     }
 
+    private JobTracker getThis() {
+        return this;
+    }
+
     // Check whether workers are alive
     private class HeartbeatThread extends Thread {
         @Override
         synchronized public void run() {
             while (running) {
                 for (WorkerHandler wh : workerHandlerList)
-                    if (!wh.isAlive()) {
+                    if (!wh.alive()) {
                         // Worker Failure
                     }
                 try {
@@ -202,9 +215,10 @@ public class JobTracker {
         @Override
         synchronized public void run() {
             while (running) {
+                Socket socket;
                 try {
-                    Socket socket = clientServerSocket.accept();
-                    ClientHandler clientHandler = new ClientHandler(conf, nextClientId++, socket);
+                    socket = clientServerSocket.accept();
+                    ClientHandler clientHandler = new ClientHandler(getThis(), conf, nextClientID++, socket);
                     clientHandlerList.add(clientHandler);
                     System.out.println("New client connected: " + socket.getRemoteSocketAddress());
                 } catch (IOException e) {
@@ -218,9 +232,10 @@ public class JobTracker {
         @Override
         synchronized public void run() {
             while (running) {
+                Socket socket;
                 try {
-                    Socket socket = workerServerSocket.accept();
-                    WorkerHandler workerHandler = new WorkerHandler(conf, nextWorkerId++, socket);
+                    socket = workerServerSocket.accept();
+                    WorkerHandler workerHandler = new WorkerHandler(getThis(), conf, nextWorkerID++, socket);
                     workerHandlerList.add(workerHandler);
                     System.out.println("New worker connected: " + socket.getRemoteSocketAddress());
                 } catch (IOException e) {

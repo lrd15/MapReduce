@@ -8,18 +8,19 @@ import lib.input.InputSplit;
 import lib.input.RecordReader;
 import lib.output.*;
 
-
 public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
 	private TreeMap<KEYOUT, VALUEOUT> output;
 	private RecordReader<KEYIN, VALUEIN> reader;
 	private RecordWriter<KEYOUT, VALUEOUT> writer;
+	private Partitioner<KEYOUT, VALUEOUT> partitioner;
 	private InputSplit inputSplit;
 
     public MapContext(RecordReader<KEYIN,VALUEIN> reader, RecordWriter<KEYOUT,VALUEOUT> writer, InputSplit inputSplit) {
     	this.reader = reader;
     	this.writer = writer;
     	this.inputSplit = inputSplit;
+    	this.partitioner = new HashPartitioner<KEYOUT, VALUEOUT>(); //TODO: other than default
     	this.output = new TreeMap<KEYOUT, VALUEOUT>();
     }
     

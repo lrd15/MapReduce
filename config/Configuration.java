@@ -2,6 +2,7 @@ package config;
 
 public class Configuration {
 	
-	public Configuration() { }
-
+	public static void addDefaultResource(String name) {
+		
+	}
 }

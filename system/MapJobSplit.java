@@ -1,13 +1,13 @@
 class MapJobSplit {
         InputSplit split;
         JobState state;
-        int workerId;
+        int workerID;
         String[] intermediateFilenames;
 
         public MapJobSplit(InputSplit split) {
             this.split = split;
             state = JobState.IDLE;
-            workerId = -1;
+            workerID = -1;
             intermediateFilenames = null;
         }
 
@@ -22,20 +22,20 @@ class MapJobSplit {
                 intermediateFilenames[i] = filenames[i];
         }
 
-        public JobState getState() {
+        public JobState getJobState() {
             return state;
         }
 
-        public void setState(JobState s) {
+        public void setJobState(JobState s) {
             state = s;
         }
 
-        public int getWorkerId() {
-            return workerId;
+        public int getWorkerID() {
+            return workerID;
         }
 
-        public void setWorkerId(int id) {
-            workerId = id;
+        public void setWorkerID(int id) {
+            workerID = id;
         }
 
         public InputSplit getInputSplit() {

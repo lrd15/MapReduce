@@ -3,34 +3,37 @@ package examples;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.StringTokenizer;
-
-import config.Configuration;
-import config.Job;
 
 import lib.input.FixedLengthInputFormat;
 import lib.output.FileOutputFormat;
-import mapreduce2.*;
+import mapreduce2.MapContext;
+import mapreduce2.Mapper;
+import mapreduce2.ReduceContext;
+import mapreduce2.Reducer;
+import config.Configuration;
+import config.Job;
 
 public class WordCount {
 
-	public static class TokenizerMapper extends Mapper<Object, String, String, String> {
-
-		public void map(Object key, String value, MapContext context) throws IOException {
-			StringTokenizer itr = new StringTokenizer(value.toString());
+	public static class TokenizerMapper extends Mapper<Long, String, String, String> {
+		
+		@Override
+		public void map(Long key, String value, MapContext<Long, String, String, String> context) throws IOException {
+			StringTokenizer itr = new StringTokenizer(value);
 			while (itr.hasMoreTokens()) {
 				context.write(itr.nextToken(), "1");
 			}
 		}
 	}
 
-	public static class IntSumReducer extends Reducer<String, Integer, String, String> {
-		// ??
-		public void reduce(String key, Iterable<Integer> values, ReduceContext<String, Integer, String, String> context) throws IOException {
+	public static class IntSumReducer extends Reducer<String, String, String, String> {
+		//??
+		@Override
+		public void reduce(String key, Iterable<String> values, ReduceContext<String, String, String, String> context) throws IOException {
 			int sum = 0;
-			for (Integer val : values) {
-				sum += val;
+			for (String val : values) {
+				sum += Integer.valueOf(val);
 			}
 			context.write(key, Integer.toString(sum));
 		}
@@ -38,27 +41,22 @@ public class WordCount {
 
 	public static void main(String[] args) throws Exception {
 		//TODO: hard code here
-		Path path1 = FileSystems.getDefault().getPath("./test/input1");
-		Path path2 = FileSystems.getDefault().getPath("./test/");
+		Path path1 = FileSystems.getDefault().getPath("test");
+		Path path2 = FileSystems.getDefault().getPath("output");
 		
 		Configuration conf = new Configuration();
-		Job job = Job.getInstance(conf, "word count");
+		Job job = Job.getInstance(conf, "wordcount");
 		
-		//job.setJarByClass(WordCount.class);
 		job.setMapperClass(TokenizerMapper.class);
-		//job.setCombinerClass(IntSumReducer.class);
 		job.setReducerClass(IntSumReducer.class);
 		//job.setOutputKeyClass(String.class);
 		//job.setOutputValueClass(Integer.class);
 		job.setRecordSize(11);
-		job.setNumOfReduceJobs(1);
-		//job.setNumOfMapJobs(1);
-		//setPartitionerClass
 		
-		FixedLengthInputFormat.addInputPaths(job, path1); 
+		job.setInputPath(path1);
+		job.setOutputPath(path2);
+		
 		job.setInputFormatClass(FixedLengthInputFormat.class); //for mapper
-
-		FileOutputFormat.addInputPaths(job, path2);
 		job.setOutputFormatClass(FileOutputFormat.class); //for reducer
 		
 		job.submit();
