@@ -37,8 +37,8 @@ public class JobTracker extends Thread {
         clientHandlerList = new ArrayList<ClientHandler>();
         mapJobList = new ArrayList<MapJob>();
         reduceJobList = new ArrayList<ReduceJob>();
-        clientServerSocket = new ServerSocket(conf.getMaster().getClientPort());
-        workerServerSocket = new ServerSocket(conf.getMaster().getWorkerPort());
+        clientServerSocket = new ServerSocket(conf.getMaster().getPortForClient());
+        workerServerSocket = new ServerSocket(conf.getMaster().getPortForWorker());
 
         ClientListener clientListener = new ClientListener();
         clientListener.start();
@@ -206,7 +206,7 @@ public class JobTracker extends Thread {
 
     private WorkerHandler getWorkerHandler(Host host) {
         for (WorkerHandler wh : workerHandlerList)
-            if (wh.getSocket().getLocalAddress().equals(host.getAddress()))
+            if (wh.getSocket().getLocalAddress().equals(host.getIPAddress()))
                 return wh;
         return null;
     }

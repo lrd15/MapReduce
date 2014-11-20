@@ -1,24 +1,28 @@
+package system;
+
 import java.net.InetAddress;
 
 public class Host {
-    private InetAddress address;
-    private int clientPort, workerPort;
+	
+    private InetAddress ipAddress;
+    private int portForClient;
+    private int portForWorker;
 
-    public Host(InetAddress address, int clientPort, int workerPort) {
-        this.address = address;
-        this.clientPort = clientPort;
-        this.workerPort = workerPort;
+    public Host(InetAddress ipAddress, int portForClient, int portForWorker) {
+        this.ipAddress = ipAddress;
+        this.portForClient = portForClient;
+        this.portForWorker = portForWorker;
     }
 
-    public InetAddress getAddress() {
-        return address;
+    public InetAddress getIPAddress() {
+        return ipAddress;
     }
 
-    public int getClientPort() {
-        return clientPort;
+    public int getPortForClient() {
+        return portForClient;
     }
 
-    public int getWorkerPort() {
-        return workerPort;
+    public int getPortForWorker() {
+        return portForWorker;
     }
 }

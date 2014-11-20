@@ -30,11 +30,11 @@ public class TaskTracker extends Thread {
         if (self == null)
             throw new Exception("This host is not registered.");
 
-        clientServerSocket = new ServerSocket(self.getClientPort());
-        workerServerSocket = new ServerSocket(self.getWorkerPort());
+        clientServerSocket = new ServerSocket(self.getPortForClient());
+        workerServerSocket = new ServerSocket(self.getPortForWorker());
 
 
-        socket = new Socket(conf.getMaster().getAddress(), conf.getMaster().getWorkerPort());
+        socket = new Socket(conf.getMaster().getIPAddress(), conf.getMaster().getPortForWorker());
         fromHandler = new ObjectInputStream(socket.getInputStream());
         toHandler = new ObjectOutputStream(socket.getOutputStream());
 
