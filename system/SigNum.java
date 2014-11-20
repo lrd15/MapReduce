@@ -1,0 +1,10 @@
+package system;
+
+public enum SigNum {
+	MAP_COMPLETED,
+	REDUCE_COMPLETED,
+	HEARTBEAT,
+	INIT_MAP,
+	INIT_REDUCE,
+	ADD_JOB
+}

@@ -3,6 +3,7 @@ package system;
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+
 public class WorkerHandler extends Thread {
     // Status codes
     public static final int MAP_JOB = 1;
@@ -46,10 +47,10 @@ public class WorkerHandler extends Thread {
                 if (obj instanceof Signal) {
                     Signal sig = (Signal)obj;
                     switch (sig.getSignal()) {
-                        case Signal.HEARTBEAT:
+                        case HEARTBEAT:
                             alive = true;
                             break;
-                        case Signal.MAP_COMPLETED:
+                        case MAP_COMPLETED:
                             // Code to get filenames
                             String[] filenames = null; // TODO
                             MapJobSplit split = master.getMapJobSplit(jobID, idx);
@@ -57,7 +58,7 @@ public class WorkerHandler extends Thread {
                             setWorkerState(WorkerState.IDLE);
                             split.setIntermediateFilenames(filenames);
                             break;
-                        case Signal.REDUCE_COMPLETED:
+                        case REDUCE_COMPLETED:
                             ReducePartition partition = master.get
                             break;
                     }
