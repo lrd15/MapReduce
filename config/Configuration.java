@@ -29,11 +29,15 @@ public class Configuration {
 	public static int NUM_OF_SPLITS;
 
 	static {
-		DocumentBuilderFactory builderFactory = DocumentBuilderFactory
-				.newInstance();
+		DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
 		try {
 			builder = builderFactory.newDocumentBuilder();
+			addDefaultResource("resources/config.xml");
 		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		} catch (SAXException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -93,7 +97,7 @@ public class Configuration {
 		return document.getElementsByTagName(tag).item(0).getNodeValue();
 	}
 	
-	public static void main(String[] args) throws SAXException, IOException {
-		Configuration.addDefaultResource("resources/config.xml");
-	}
+//	public static void main(String[] args) throws SAXException, IOException {
+//		Configuration.addDefaultResource("resources/config.xml");
+//	}
 }

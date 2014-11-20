@@ -1,9 +1,6 @@
 package system;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -14,7 +11,6 @@ import java.util.ArrayList;
 
 import lib.input.InputFormat;
 import lib.input.InputSplit;
-
 import config.Configuration;
 import config.Job;
 
@@ -43,6 +39,8 @@ public class JobClient {
 		sendInputSplitsToMaster();
 		acknowledgeMaster();
 	}
+	
+	public void submitJobOnSingleNode(Job job) { }
 
 	private void getJobIDFromMaster() {
 		try {

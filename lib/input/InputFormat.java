@@ -1,8 +1,6 @@
 package lib.input;
 
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
 
 import config.Job;
 
