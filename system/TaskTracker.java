@@ -134,6 +134,7 @@ public class TaskTracker extends Thread {
                     System.out.println("New client connected: " + socket.getRemoteSocketAddress());
                 } catch (IOException e) {
                     System.err.println("Failed to connect client: " + socket.getRemoteSocketAddress());
+                    e.printStackTrace();
                 }
             }
         }
@@ -151,6 +152,7 @@ public class TaskTracker extends Thread {
                     System.out.println("New worker connected: " + socket.getRemoteSocketAddress());
                 } catch (IOException e) {
                     System.err.println("Failed to connect worker: " + socket.getRemoteSocketAddress());
+                    e.printStackTrace();
                 }
             }
         }
