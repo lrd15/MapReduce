@@ -19,7 +19,7 @@ public class ReduceJob {
         return id;
     }
 
-    public boolean completed() {
+    public boolean isCompleted() {
         return numCompleted == partitions.length;
     }
 
@@ -35,12 +35,8 @@ public class ReduceJob {
         numIdle--;
     }
 
-    public void incNumCompleted() {
+    synchronized public void incNumCompleted() {
         numCompleted++;
-    }
-
-    public void decNumCompleted() {
-        numCompleted--;
     }
 
     public int nextIdlePartitionIdx() {

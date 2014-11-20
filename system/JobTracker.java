@@ -1,12 +1,8 @@
-package system;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.net.ServerSocket;
 import java.net.Socket;
-
-import config.Configuration;
 
 public class JobTracker extends Thread {
     private ArrayList<WorkerHandler> workerHandlerList;
@@ -26,19 +22,23 @@ public class JobTracker extends Thread {
 
     private ServerSocket clientServerSocket, workerServerSocket;
 
-    public JobTracker() throws IOException {
+    private Configuration conf;
+
+    public JobTracker(Configuration config) {
         nextClientID = 0;
         nextWorkerID = 0;
         running = true;
         curMapJobIdx = curReduceJobIdx = 0;
         doMap = true;
 
+        conf = config;
+
         workerHandlerList = new ArrayList<WorkerHandler>();
         clientHandlerList = new ArrayList<ClientHandler>();
         mapJobList = new ArrayList<MapJob>();
         reduceJobList = new ArrayList<ReduceJob>();
-        clientServerSocket = new ServerSocket(Configuration.MASTER.getPortForClient());
-        workerServerSocket = new ServerSocket(Configuration.MASTER.getPortForWorker());
+        clientServerSocket = new ServerSocket(conf.getMaster().getPortForClient());
+        workerServerSocket = new ServerSocket(conf.getMaster().getPortForWorker());
 
         ClientListener clientListener = new ClientListener();
         clientListener.start();
@@ -67,7 +67,7 @@ public class JobTracker extends Thread {
                                     mapCompleted = false;
                                 if (split.getJobState() != JobState.IDLE)
                                     continue;
-                                Host[] hosts = split.getInputSplit().getLocations();
+                                Host[] hosts = split.getInputSplit.getLocations();
                                 for (Host host : hosts) {
                                     WorkerHandler wh = getWorkerHandler(host);
                                     if (wh != null && wh.isIdle()) { // Found idle worker

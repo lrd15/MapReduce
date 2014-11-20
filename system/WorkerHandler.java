@@ -21,6 +21,7 @@ public class WorkerHandler extends Thread {
     private JobTracker master;
 
     private WorkerState state;
+    private boolean running;
 
     private int jobID, idx, status;
 
@@ -32,7 +33,7 @@ public class WorkerHandler extends Thread {
         state = WorkerState.IDLE;
         jobID = idx = -1;
         status = NONE;
-
+        running = true;
         this.socket = socket;
         fromWorker = new ObjectInputStream(socket.getInputStream());
         toWorker = new ObjectOutputStream(socket.getOutputStream());
@@ -40,8 +41,8 @@ public class WorkerHandler extends Thread {
 
     @Override
     public void run() {
-        socket.setSoTimeout(Configuration.TIMEOUT); // Set timeout in ms
-        while (true) {
+        socket.setSoTimeout(conf.TIMEOUT); // Set timeout in ms
+        while (running) {
             try {
                 Object obj = fromWorker.readObject();
                 if (obj instanceof Signal) {
@@ -52,21 +53,34 @@ public class WorkerHandler extends Thread {
                             break;
                         case MAP_COMPLETED:
                             // Code to get filenames
+
                             String[] filenames = null; // TODO
-                            MapJobSplit split = master.getMapJobSplit(jobID, idx);
+                            MapJob job = master.getMapJob(jobID);
+                            MapJobSplit split = job.getSplit(idx);
                             split.setJobState(JobState.COMPLETED);
                             setWorkerState(WorkerState.IDLE);
                             split.setIntermediateFilenames(filenames);
+                            job.incNumCompleted();
+                            if (job.isCompleted())
+                                master.migrate(job);
                             break;
                         case REDUCE_COMPLETED:
-                            ReducePartition partition = master.get
+                            ReduceJob job = master.getReduceJob(jobID);
+                            ReducePartition partition = job.getPartition(idx);
+                            partition.setJobState(JobState.COMPLETED);
+                            setWorkerState(WorkerState.IDLE);
+                            job.incNumCompleted();
+                            if (job.isCompleted())
+                                master.removeReduceJob(job);
                             break;
                     }
                 }
             } catch (SocketTimeoutException e) { // Timeout -> tracker dies
                 alive = false;
+                running = false;
             }
         }
+        master.removeWorkerHandler(this);
     }
 
     synchronized public Object readObject() {
