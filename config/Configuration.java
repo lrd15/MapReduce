@@ -18,59 +18,82 @@ import javax.xml.parsers.ParserConfigurationException;
 import system.Host;
 
 public class Configuration {
-	
+
 	private static DocumentBuilder builder = null;
-	
+
 	public static Host MASTER = null;
-    public static ArrayList<Host> WORKERS = new ArrayList<Host>();
+	public static ArrayList<Host> WORKERS = new ArrayList<Host>();
 	public static final int TIMEOUT = 30000;
-	
+	public static int NUM_OF_MAPPERS;
+	public static int NUM_OF_REDUCERS;
+	public static int NUM_OF_SPLITS;
+
 	static {
-		DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilderFactory builderFactory = DocumentBuilderFactory
+				.newInstance();
 		try {
 			builder = builderFactory.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
 		}
 	}
-	
-	public static void addDefaultResource(String filename) throws SAXException, IOException {
-		File file  = new File(filename);
+
+	public static void addDefaultResource(String filename) throws SAXException,
+			IOException {
+		File file = new File(filename);
 		Document document = builder.parse(file);
 		document.getDocumentElement().normalize();
-		
-		//master
+
+		// master
 		NodeList nList = document.getElementsByTagName("master");
 		Node node = nList.item(0);
 		if (node.getNodeType() == Node.ELEMENT_NODE) {
 			Element element = (Element) node;
-			MASTER = new Host(InetAddress.getByName(getValue("ip", element)), 
-					Integer.valueOf(getValue("port-for-client", element)), 
-					Integer.valueOf(getValue("port-for-worker", element)));
+			MASTER = new Host(InetAddress.getByName(getChild("ip", element)),
+					Integer.valueOf(getChild("port-for-client", element)),
+					Integer.valueOf(getChild("port-for-worker", element)));
 		}
-		
-		//workers
+
+		// workers
 		nList = document.getElementsByTagName("worker");
-		for(int i=0; i<nList.getLength(); i++) {
+		for (int i = 0; i < nList.getLength(); i++) {
 			node = nList.item(i);
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
-	            Element element = (Element) node;
-	            Host worker = new Host(InetAddress.getByName(getValue("ip", element)), 
-						Integer.valueOf(getValue("port-for-client", element)), 
-						Integer.valueOf(getValue("port-for-worker", element)));
-	            WORKERS.add(worker);
+				Element element = (Element) node;
+				Host worker = new Host(InetAddress.getByName(getChild("ip",
+						element)), Integer.valueOf(getChild("port-for-client",
+						element)), Integer.valueOf(getChild("port-for-worker",
+						element)));
+				WORKERS.add(worker);
 			}
 		}
+
+		NUM_OF_MAPPERS = Integer.valueOf(getValue("num-of-mappers", document));
+		NUM_OF_REDUCERS = Integer.valueOf(getValue("num-of-reducers", document));
+		NUM_OF_SPLITS = Integer.valueOf(getValue("num-of-splits", document));
+		
 	}
-	
-	private static String getValue(String tag, Element element) {
-		NodeList nodes = element.getElementsByTagName(tag).item(0).getChildNodes();
+
+	public static Host getWorkerByAddress(String ipAddress) {
+		for (Host h : WORKERS) {
+			if (h.getIPAddress().getHostAddress().equals(ipAddress))
+				return h;
+		}
+		return null;
+	}
+
+	private static String getChild(String tag, Element element) {
+		NodeList nodes = element.getElementsByTagName(tag).item(0)
+				.getChildNodes();
 		Node node = (Node) nodes.item(0);
 		return node.getNodeValue();
 	}
-
+	
+	private static String getValue(String tag, Document document) {
+		return document.getElementsByTagName(tag).item(0).getNodeValue();
+	}
+	
 	public static void main(String[] args) throws SAXException, IOException {
 		Configuration.addDefaultResource("resources/config.xml");
 	}
 }
-

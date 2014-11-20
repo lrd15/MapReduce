@@ -8,13 +8,11 @@ public class TaskTrackerClientHandler extends Thread {
     private ObjectInputStream fromClient;
     private ObjectOutputStream toClient;
 
-    private Configuration conf;
     boolean running;
 
-    public TaskTrackerClientHandler(Configuration conf, int id, Socket socket) {
+    public TaskTrackerClientHandler(int id, Socket socket) throws IOException {
         this.id = id;
         this.socket = socket;
-        this.conf = conf;
         running = true;
         this.socket = socket;
         fromClient = new ObjectInputStream(socket.getInputStream());

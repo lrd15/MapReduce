@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
+import config.Configuration;
+
 public class WorkerHandler extends Thread {
     // Status codes
     public static final int MAP_JOB = 1;
@@ -16,18 +18,16 @@ public class WorkerHandler extends Thread {
     private ObjectInputStream fromWorker;
     private ObjectOutputStream toWorker;
 
-    private Configuration conf;
     private JobTracker master;
 
     private WorkerState state;
 
     private int jobID, idx, status;
 
-    public WorkerHandler(JobTracker master, Configuration conf, int id, Socket socket) throws IOException {
+    public WorkerHandler(JobTracker master, int id, Socket socket) throws IOException {
         this.master = master;
         this.id = id;
         this.socket = socket;
-        this.conf = conf;
         alive = true;
         state = WorkerState.IDLE;
         jobID = idx = -1;
@@ -40,7 +40,7 @@ public class WorkerHandler extends Thread {
 
     @Override
     public void run() {
-        socket.setSoTimeout(conf.TIMEOUT); // Set timeout in ms
+        socket.setSoTimeout(Configuration.TIMEOUT); // Set timeout in ms
         while (true) {
             try {
                 Object obj = fromWorker.readObject();

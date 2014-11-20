@@ -67,7 +67,7 @@ public class JobTracker extends Thread {
                                     mapCompleted = false;
                                 if (split.getJobState() != JobState.IDLE)
                                     continue;
-                                Host[] hosts = split.getInputSplits().getLocations();
+                                Host[] hosts = split.getInputSplit().getLocations();
                                 for (Host host : hosts) {
                                     WorkerHandler wh = getWorkerHandler(host);
                                     if (wh != null && wh.isIdle()) { // Found idle worker

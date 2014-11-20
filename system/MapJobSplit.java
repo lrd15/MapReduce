@@ -1,3 +1,7 @@
+package system;
+
+import lib.input.InputSplit;
+
 class MapJobSplit {
         InputSplit split;
         JobState state;
@@ -38,7 +42,7 @@ class MapJobSplit {
 
         public int getWorkerID() {
             return workerID;
-        }
+        }									
 
         public void setWorkerID(int id) {
             workerID = id;

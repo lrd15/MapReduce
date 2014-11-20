@@ -11,6 +11,6 @@ public interface JobContext {
 	public Class getInputFormatClass();
 	public Class getOutputFormatClass();
 	
-	public int getNumOfReduceJobs();
+	//public int getNumOfReduceJobs();
 	
 }

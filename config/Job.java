@@ -26,15 +26,12 @@ public class Job implements JobContext {
 	private Path inputPath;
 	private Path outputPath;
 	
-	private int numOfReduceJobs;
-	private int numOfMapJobs;
+	//private int numOfReduceJobs;
+	//private int numOfMapJobs;
 	private int recordSize;
-	
-	private JobClient jobclient;
 	
 	private Job(Configuration config, String identifier) { 
 		//Configuration.addDefaultResource("");
-		this.jobclient = new JobClient();
 		this.config = config;
 		this.identifier = identifier;
 	}
@@ -123,17 +120,17 @@ public class Job implements JobContext {
 		return this.outputPath;
 	}
 	
-	public void setNumOfReduceJobs(int tasks) {
-		this.numOfReduceJobs = tasks;
-	}
-	
-	public int getNumOfReduceJobs() {
-		return this.numOfReduceJobs;
-	}
-	
-	public void setNumOfMapJobs(int tasks) {
-		this.numOfMapJobs = tasks;
-	}
+//	public void setNumOfReduceJobs(int tasks) {
+//		this.numOfReduceJobs = tasks;
+//	}
+//	
+//	public int getNumOfReduceJobs() {
+//		return this.numOfReduceJobs;
+//	}
+//	
+//	public void setNumOfMapJobs(int tasks) {
+//		this.numOfMapJobs = tasks;
+//	}
 	
 	public void setRecordSize(int recordSize) {
 		this.recordSize = recordSize;
@@ -144,7 +141,7 @@ public class Job implements JobContext {
 	}
 	
 	public void submit() throws InstantiationException, IllegalAccessException, IOException {
-		this.jobclient.submitJob(this);
+		new JobClient().submitJob(this);
 	}
 
 }
