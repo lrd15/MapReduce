@@ -32,6 +32,7 @@ public class JobClient {
 	}
 
 	public void submitJob(Job job) throws ClassNotFoundException, IOException, InstantiationException, IllegalAccessException {
+		System.out.println("Job submitted");
 		this.job = job;
 		getJobIDFromMaster();
 		sendFilesToWorkers();
@@ -39,15 +40,15 @@ public class JobClient {
 		sendInputSplitsToMaster();
 	}
 	
-	public void submitJobOnSingleNode(Job job) { }
-
 	private void getJobIDFromMaster() throws IOException, ClassNotFoundException {
+		System.out.println("JobClient getting ID from master");
 		toMaster.writeObject(new Signal(SigNum.ADD_JOB));
 		int jobID = (Integer) fromMaster.readObject();
 		this.job.setID(jobID);
 	}
 
 	private void sendInputSplitsToMaster() throws InstantiationException, IllegalAccessException, IOException {
+		System.out.println("JobClient sending input splits to master");
 		int numSplits = Configuration.NUM_OF_SPLITS;
 		InputFormat inputFormat = null;
 		InputSplit[] inputSplits = null;
@@ -57,6 +58,7 @@ public class JobClient {
 	}
 
 	private void sendFilesToWorkers() throws IOException {
+		System.out.println("JobClient sending files to workers");
 		ArrayList<ObjectOutputStream> toWorkers = new ArrayList<ObjectOutputStream>();
 		ArrayList<ObjectInputStream> fromWorkers = new ArrayList<ObjectInputStream>();
 		for (Host worker : Configuration.WORKERS) {
@@ -77,6 +79,7 @@ public class JobClient {
 	}
 
 	private void acknowledgeMaster() throws IOException {
+		System.out.println("JobClient acknowledging master");
 		toMaster.writeObject(new Signal(SigNum.ADD_JOB_COMPLETED));
 	}
 
