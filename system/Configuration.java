@@ -12,9 +12,10 @@ public class Configuration {
         return master;
     }
 
-    public Host getWorker(int i) {
-        if (i >= workerList.size())
-            return null;
-        return workerList.get(i);
+    public Host getWorkerByAddress(String ipAddress) {
+        for (Host h : workerList)
+            if (h.getAddress().getHostAddress().equals(ipAddress))
+                return h;
+        return null;
     }
 }
