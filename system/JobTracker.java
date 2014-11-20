@@ -317,4 +317,13 @@ public class JobTracker extends Thread {
             }
         }
     }
+    
+    public static void main(String[] args) {
+    	try {
+    		JobTracker jobTracker = new JobTracker();
+    		jobTracker.start();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    	}
+    }
 }

@@ -155,4 +155,13 @@ public class TaskTracker extends Thread {
             }
         }
     }
+    
+    public static void main(String[] args) {
+    	try {
+    		TaskTracker taskTracker = new TaskTracker();
+    		taskTracker.start();
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    }
 }
