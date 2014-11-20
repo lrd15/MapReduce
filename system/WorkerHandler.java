@@ -1,9 +1,11 @@
 import java.io.*;
 import java.net.Socket;
 public class WorkerHandler extends Thread {
+    // Status codes
     public static final int MAP_JOB = 1;
     public static final int REDUCE_JOB = 2;
     public static final int NONE = 0;
+
     private int id;
     private boolean alive;
     private Socket socket;
@@ -48,7 +50,7 @@ public class WorkerHandler extends Thread {
                     case Signal.REDUCE_COMPLETED:
                         // Code here
                         break;
-                }
+                    }
                 }
             } catch (SocketTimeoutException e) { // Timeout -> tracker dies
                 alive = false;
