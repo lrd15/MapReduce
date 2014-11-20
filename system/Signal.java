@@ -1,20 +1,24 @@
 package system;
 
 public class Signal {
-    public static final int MAP_COMPLETED = 1;
-    public static final int REDUCE_COMPLETED = 2;
-    public static final int HEARTBEAT = 3;
-    public static final int INIT_MAP = 4;
-    public static final int INIT_REDUCE = 5;
-    public static final int ADD_JOB = 6;
 
-    private int signal;
+    private SignalNum signal;
 
-    public Signal(int signal) {
+    public Signal(SignalNum signal) {
         this.signal = signal;
     }
 
-    public int getSignal() {
+    public SignalNum getSignal() {
         return signal;
     }
+    
+}
+
+enum SignalNum {
+	MAP_COMPLETED,
+	REDUCE_COMPLETED,
+	HEARTBEAT,
+	INIT_MAP,
+	INIT_REDUCE,
+	ADD_JOB
 }

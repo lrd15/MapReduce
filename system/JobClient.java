@@ -8,7 +8,6 @@ import lib.input.InputFormat;
 import lib.input.InputSplit;
 import lib.input.LineRecordReader;
 import lib.input.RecordReader;
-import lib.output.FileRecordWriter;
 import lib.output.OutputFormat;
 import lib.output.RecordWriter;
 import mapreduce2.MapContext;
