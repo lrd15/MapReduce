@@ -10,6 +10,7 @@ public class Job implements JobContext {
 	
 	private Configuration config;
 	private String identifier;
+	private int jobID;
 	
 	private Class mapperClass;
 	private Class combinerClass;
@@ -40,6 +41,18 @@ public class Job implements JobContext {
 	
 	public static Job getInstance(Configuration config, String identifier) {
 		return new Job(config, identifier);
+	}
+	
+	public int getID() {
+		return this.jobID;
+	}
+	
+	public void setID(int id) {
+		this.jobID = id;
+	}
+	
+	public String getJobIdentifier() {
+		return this.identifier;
 	}
 	
 	public void setMapperClass(Class mapperClass) {
@@ -112,6 +125,10 @@ public class Job implements JobContext {
 	
 	public void setNumOfReduceJobs(int tasks) {
 		this.numOfReduceJobs = tasks;
+	}
+	
+	public int getNumOfReduceJobs() {
+		return this.numOfReduceJobs;
 	}
 	
 	public void setNumOfMapJobs(int tasks) {

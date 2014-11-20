@@ -127,15 +127,37 @@ public class JobTracker extends Thread {
 
     private void initReduce(WorkerHandler wh, ReducePartition partition,
             int jobID, int partitionIdx) {
-
+        wh.writeObject(new Signal(Signal.INIT_REDUCE));
+        wh.writeObject(partition);
+        partition.setJobState(JobState.IN_PROGRESS);
+        partition.setWorkerID(wh.getID());
+        wh.setWorkerState(WorkerState.BUSY);
+        wh.setJobStatus(WorkerHandler.REDUCE_JOB, jobID, partitionIdx);
     }
 
     private void migrate(MapJob mapJob) {
         MapJobSplit[] splits = mapJob.getSplits();
         if (splits.length == 0)
             return;
-        
-        ReducePartition[] partitions;
+        ReducePartition[] partitions = new ReducePartition[conf.NUM_OF_REDUCERS];
+        for (int i = 0; i < conf.NUM_OF_REDUCERS; i++) {
+            // Partition i
+            ArrayList<Integer> mapperIDList = new ArrayList<Integer>();
+            ArrayList<String> filenameList = new ArrayList<String>();
+            for (MapJobSplit split : splits) {
+                String filename = split.getIntermediateFilename(i);
+                if (filename != null) {
+                    mapperIDList.add(split.getWorkerID());
+                    filenameList.add(filename);
+                }
+            }
+            Integer[] mIDs = mapperIDList.toArray(new Integer[mapperIDList.size()]);
+            int[] mapperIDs = new int[mIDs.length];
+            for (int i = 0; i < mapperIDs.length; i++)
+                mapperIDs[i] = mIDs[i];
+            partitions[i] = new ReducePartition(mapperIDs,
+                filenameList.toArray(new String[filenameList.size()]));
+        }
         ReduceJob reduceJob = new ReduceJob(mapJob.getID(), partitions);
         reduceJobList.add(reduceJob);
     }

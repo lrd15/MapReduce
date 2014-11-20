@@ -49,12 +49,14 @@ public class WorkerHandler extends Thread {
                             break;
                         case Signal.MAP_COMPLETED:
                             // Code to get filenames
+                            String[] filenames = null; // TODO
                             MapJobSplit split = master.getMapJobSplit(jobID, idx);
                             split.setJobState(JobState.COMPLETED);
                             setWorkerState(WorkerState.IDLE);
+                            split.setIntermediateFilenames(filenames);
                             break;
                         case Signal.REDUCE_COMPLETED:
-                            // Code here
+                            ReducePartition partition = master.get
                             break;
                     }
                 }

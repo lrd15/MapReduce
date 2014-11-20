@@ -7,6 +7,7 @@ import java.util.StringTokenizer;
 
 import lib.input.FixedLengthInputFormat;
 import lib.output.FileOutputFormat;
+import mapreduce2.HashPartitioner;
 import mapreduce2.MapContext;
 import mapreduce2.Mapper;
 import mapreduce2.ReduceContext;
@@ -28,7 +29,6 @@ public class WordCount {
 	}
 
 	public static class IntSumReducer extends Reducer<String, String, String, String> {
-		//??
 		@Override
 		public void reduce(String key, Iterable<String> values, ReduceContext<String, String, String, String> context) throws IOException {
 			int sum = 0;
@@ -49,9 +49,11 @@ public class WordCount {
 		
 		job.setMapperClass(TokenizerMapper.class);
 		job.setReducerClass(IntSumReducer.class);
+		job.setPartitionerClass(HashPartitioner.class);
 		//job.setOutputKeyClass(String.class);
 		//job.setOutputValueClass(Integer.class);
 		job.setRecordSize(11);
+		job.setNumOfReduceJobs(3);
 		
 		job.setInputPath(path1);
 		job.setOutputPath(path2);

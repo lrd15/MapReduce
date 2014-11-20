@@ -62,7 +62,7 @@ public class TaskTracker extends Thread {
                             boolean success = doMap(inputSplit);
                             if (success) {
                                 toHandler.writeObject(new Signal(Signal.MAP_COMPLETED));
-                                // Send other information
+                                // Send object "String[conf.NUM_OF_REDUCERS] filenames" - abby
                             }
                         }
                         else {
@@ -71,6 +71,15 @@ public class TaskTracker extends Thread {
                         break;
                     case Signal.INIT_REDUCE:
                         // Code here
+                        Object partitionObj = fromHandler.readObject();
+                        if (partitionObj instanceof ReducePartition) {
+                            ReducePartition partition = (ReducePartition)partitionObj;
+                            boolean success = doReduce(partition);
+                            if (success) {
+                                toHandler.writeObject(new Signal(Signal.REDUCE_COMPLETED));
+                                // No other information to send
+                            }
+                        }
                         break;
                 
                 }
@@ -80,7 +89,12 @@ public class TaskTracker extends Thread {
 
     // Return true if successful
     private boolean doMap(InputSplit inputSplit) {
+        // TODO by abby
+    }
 
+    // Return true if successful
+    private boolean doReduce(ReducePartition partition) {
+        // TODO by abby
     }
 
     // Periodically send heartbeat to job tracker

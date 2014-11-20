@@ -18,7 +18,7 @@ public class Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 	
 	public void run(ReduceContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> context) throws IOException { 
 		setup(context);
-		System.out.print("Reducer working...");
+		System.out.println("Reducer is up...");
 		while(context.nextKey()) {
 			reduce(context.getCurrentKey(), context.getValues(), context);
 		}

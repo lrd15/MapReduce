@@ -1,8 +1,11 @@
 package mapreduce2;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.TreeMap;
+
+import config.JobContext;
 
 import lib.input.InputSplit;
 import lib.input.RecordReader;
@@ -10,18 +13,25 @@ import lib.output.*;
 
 public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
+	private JobContext jobContext;
 	private TreeMap<KEYOUT, VALUEOUT> output;
 	private RecordReader<KEYIN, VALUEIN> reader;
-	private RecordWriter<KEYOUT, VALUEOUT> writer;
 	private Partitioner<KEYOUT, VALUEOUT> partitioner;
 	private InputSplit inputSplit;
+	
+	private static int id = 0;
 
-    public MapContext(RecordReader<KEYIN,VALUEIN> reader, RecordWriter<KEYOUT,VALUEOUT> writer, InputSplit inputSplit) {
+    public MapContext(JobContext jobContext,
+    				  RecordReader<KEYIN,VALUEIN> reader, 
+    				  //RecordWriter<KEYOUT,VALUEOUT> writer, 
+    				  InputSplit inputSplit, 
+    				  Partitioner<KEYOUT, VALUEOUT> partitioner) {
+    	this.jobContext = jobContext;
     	this.reader = reader;
-    	this.writer = writer;
     	this.inputSplit = inputSplit;
-    	this.partitioner = new HashPartitioner<KEYOUT, VALUEOUT>(); //TODO: other than default
+    	this.partitioner = partitioner;
     	this.output = new TreeMap<KEYOUT, VALUEOUT>();
+    	id++;
     }
     
     public KEYIN getCurrentKey() throws IOException {
@@ -45,10 +55,21 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 	}
     
     public void close() throws IOException {
-    	for(Map.Entry<KEYOUT, VALUEOUT> entry : output.entrySet()) {
-    		this.writer.write(entry.getKey(), entry.getValue());
+    	int numOfReducer = this.jobContext.getNumOfReduceJobs();
+    	RecordWriter[] partitionWriters = new RecordWriter[numOfReducer];
+    	for(int i=0; i<numOfReducer; i++) {
+    		String filename = "/"+jobContext.getJobIdentifier()+id+"_"+i;
+    		partitionWriters[i] = new FileRecordWriter(Paths.get("./"), filename);
     	}
-    	this.writer.close();
+    	for(Map.Entry<KEYOUT, VALUEOUT> entry : output.entrySet()) {
+    		KEYOUT key = entry.getKey();
+    		VALUEOUT value = entry.getValue();
+    		int index = this.partitioner.getPartition(key, value, numOfReducer);
+    		partitionWriters[index].write(key, value);
+    	}
+    	for(int i=0; i<numOfReducer; i++) {
+    		partitionWriters[i].close();
+    	}
 		this.reader.close();
 	}
    

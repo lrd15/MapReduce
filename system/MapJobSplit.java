@@ -2,6 +2,10 @@ class MapJobSplit {
         InputSplit split;
         JobState state;
         int workerID;
+
+        // Size == NUM_REDUCERS
+        // intermediateFilenames[i] == null if corresponding
+        // partition has no map output
         String[] intermediateFilenames;
 
         public MapJobSplit(InputSplit split) {
@@ -11,8 +15,10 @@ class MapJobSplit {
             intermediateFilenames = null;
         }
 
-        public String[] getIntermediateFilenames() {
-            return intermediateFilenames;
+        public String getIntermediateFilename(int i) {
+            if (i < 0 || i >= intermediateFilenames.length)
+                return null;
+            return intermediateFilenames[i];
         }
 
         public void setIntermediateFilenames(String[] filenames) {

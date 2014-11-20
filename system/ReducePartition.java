@@ -2,8 +2,14 @@ public class ReducePartition {
     private int[] mapperIDs;
     private String[] filenames;
     private JobState state;
+    int workerID;
 
     public ReducePartition(int[] ids, String[] files) {
+        this(ids, files, -1);
+    }
+
+    public ReducePartition(int[] ids, String[] files, int workerID) {
+        this.workerID = workerID;
         state = JobState.IDLE;
         mapperIDs = new int[ids.length];
         for (int i = 0; i < ids.length; i++)
@@ -25,11 +31,19 @@ public class ReducePartition {
         return filenames;
     }
 
-    public JobState getState() {
+    public JobState getJobState() {
         return state;
     }
 
-    public void setState(JobState s) {
+    public void setJobState(JobState s) {
         state = s;
+    }
+
+    public int getWorkerID() {
+        return workerID;
+    }
+
+    public void setWorkerID(int id) {
+        workerID = id;
     }
 }
