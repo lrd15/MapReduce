@@ -1,6 +1,8 @@
 package system;
 
-public class Signal {
+import java.io.Serializable;
+
+public class Signal implements Serializable {
 
     private SigNum signal;
 
