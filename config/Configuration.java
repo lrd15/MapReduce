@@ -64,10 +64,9 @@ public class Configuration {
 			node = nList.item(i);
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
 				Element element = (Element) node;
-				Host worker = new Host(InetAddress.getByName(getChild("ip",
-						element)), Integer.valueOf(getChild("port-for-client",
-						element)), Integer.valueOf(getChild("port-for-worker",
-						element)));
+				Host worker = new Host(InetAddress.getByName(getChild("ip", element)), 
+						Integer.valueOf(getChild("port-for-client", element)), 
+						Integer.valueOf(getChild("port-for-worker", element)));
 				WORKERS.add(worker);
 			}
 		}
@@ -97,7 +96,11 @@ public class Configuration {
 		return document.getElementsByTagName(tag).item(0).getChildNodes().item(0).getNodeValue();
 	}
 	
-//	public static void main(String[] args) throws SAXException, IOException {
-//		Configuration.addDefaultResource("resources/config.xml");
-//	}
+	public static void main(String[] args) throws SAXException, IOException {
+//		Host h = getWorkerByAddress("128.237.191.70");
+//		if (h != null)
+//			System.out.println(h.getIPAddress().getHostAddress());
+//		else
+//			System.out.println("error");
+	}
 }
