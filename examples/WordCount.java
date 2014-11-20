@@ -53,7 +53,7 @@ public class WordCount {
 		//job.setOutputKeyClass(String.class);
 		//job.setOutputValueClass(Integer.class);
 		job.setRecordSize(11);
-		job.setNumOfReduceJobs(3);
+		//job.setNumOfReduceJobs(3);
 		
 		job.setInputPath(path1);
 		job.setOutputPath(path2);

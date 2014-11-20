@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.TreeMap;
 
+import config.Configuration;
 import config.JobContext;
 
 import lib.input.InputSplit;
@@ -55,7 +56,7 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 	}
     
     public void close() throws IOException {
-    	int numOfReducer = this.jobContext.getNumOfReduceJobs();
+    	int numOfReducer = Configuration.NUM_OF_REDUCERS;
     	RecordWriter[] partitionWriters = new RecordWriter[numOfReducer];
     	for(int i=0; i<numOfReducer; i++) {
     		String filename = "/"+jobContext.getJobIdentifier()+id+"_"+i;
