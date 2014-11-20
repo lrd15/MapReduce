@@ -1,3 +1,5 @@
+package system;
+
 public class ReducePartition {
     private int[] mapperIDs;
     private String[] filenames;
