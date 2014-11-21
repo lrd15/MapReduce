@@ -1,8 +1,9 @@
 package system;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 
-public class Host {
+public class Host implements Serializable{
 	
     private InetAddress ipAddress;
     private int portForClient;
