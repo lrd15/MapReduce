@@ -37,6 +37,7 @@ public class JobClient {
 		getJobIDFromMaster();
 		sendFilesToWorkers();
 		acknowledgeMaster();
+		//send job object
 		sendInputSplitsToMaster();
 	}
 	

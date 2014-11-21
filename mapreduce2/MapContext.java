@@ -1,7 +1,7 @@
 package mapreduce2;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -60,7 +60,7 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
     	RecordWriter[] partitionWriters = new RecordWriter[numOfReducer];
     	for(int i=0; i<numOfReducer; i++) {
     		String filename = "/"+jobContext.getJobIdentifier()+id+"_"+i;
-    		partitionWriters[i] = new FileRecordWriter(Paths.get("./"), filename);
+    		partitionWriters[i] = new FileRecordWriter(new File("./"), filename);
     	}
     	for(Map.Entry<KEYOUT, VALUEOUT> entry : output.entrySet()) {
     		KEYOUT key = entry.getKey();

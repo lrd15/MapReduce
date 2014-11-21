@@ -1,7 +1,7 @@
 package lib.input;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 
 import config.Configuration;
@@ -11,21 +11,23 @@ import system.Host;
 
 public class FileInputSplit extends InputSplit {
 	
+	private static final long serialVersionUID = 1L;
+
 	private static int hostItr = 0;
 	
-	private Path file;
+	private File file;
 	private long start;
 	private long length;
 	private ArrayList<Host> hosts;
 	
-	public FileInputSplit(Path file, long start, long length){
+	public FileInputSplit(File file, long start, long length){
 		this.file = file;
 		this.start = start;
 		this.length = length;
 		this.hosts = Configuration.WORKERS;
 	}
 	
-	public Path getFile() throws IOException {
+	public File getFile() throws IOException {
 		return this.file;
 	}
 	

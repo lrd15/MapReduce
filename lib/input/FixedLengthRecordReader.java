@@ -1,8 +1,8 @@
 package lib.input;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.file.Path;
 
 public class FixedLengthRecordReader extends RecordReader<Long, String> {
 
@@ -18,8 +18,8 @@ public class FixedLengthRecordReader extends RecordReader<Long, String> {
 	
 	public FixedLengthRecordReader(InputSplit split, int recordSize) throws IOException {
 		FileInputSplit fis = (FileInputSplit)split;
-		Path path = fis.getFile();
-		this.file = new RandomAccessFile(path.toFile(), "r");
+		File filename = fis.getFile();
+		this.file = new RandomAccessFile(filename, "r");
 		
 		long start = fis.getStart();
 		file.seek(start);

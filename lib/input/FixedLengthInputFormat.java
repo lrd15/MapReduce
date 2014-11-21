@@ -2,8 +2,6 @@ package lib.input;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import config.Job;
 
@@ -19,16 +17,18 @@ public class FixedLengthInputFormat extends InputFormat<Long, String> {
 	//numSplits - number of splits per file
 	public InputSplit[] getSplits(Job job, int numSplits) throws IOException {
 		System.out.println("FixedLengthInputFormat getting splits");
-		Path inputPath = job.getInputPath();
-		File folder = new File(inputPath.toUri());
-		File[] files = folder.listFiles();
+		File inputPath = job.getInputPath();
+		if(!inputPath.isDirectory()) {
+			throw new IOException("The input path doesn't corresponding to any folder");
+		}
+		File[] files = inputPath.listFiles();
 		InputSplit[] splits = new InputSplit[numSplits*files.length];
 		for(File file : files) {
 			long length = file.length() / numSplits, start = 0;
 			System.out.println("splits: " + numSplits);
 			System.out.println("length: " + length);
 			for(int i=0; i<numSplits; i++) {
-				splits[i] = new FileInputSplit(Paths.get(file.toURI()), start, length);
+				splits[i] = new FileInputSplit(file, start, length);
 				start += length;
 			}
 		}

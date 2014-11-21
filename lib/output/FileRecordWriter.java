@@ -4,15 +4,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Path;
 
 public class FileRecordWriter extends RecordWriter<String, String> {
 
 	private PrintWriter writer = null;
 	private char delimiter = ' ';
 
-	public FileRecordWriter(Path path, String outputFileName) {
-		File dir = new File(path.toString());
+	public FileRecordWriter(File dir, String outputFileName) {
 		if (!dir.exists())
 			dir.mkdir();
 		try {

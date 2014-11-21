@@ -1,20 +1,20 @@
 package lib.output;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 
 import config.Job;
 
 
 public class FileOutputFormat extends OutputFormat<String, String> {
 
-	//TODO: remove hardcode
+	//TODO
 	private static int index = 1;
 	
 	@Override
 	public RecordWriter<String, String> getRecordWriter(Job job) throws IOException {
 		System.out.println("FileOutputFormat: getRecordWriter");
-		Path path = job.getOutputPath();
+		File path = job.getOutputPath();
 		return new FileRecordWriter(path, "/hardcode"+(index++));
 	}
 	

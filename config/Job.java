@@ -1,5 +1,6 @@
 package config;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -8,36 +9,33 @@ import system.JobClient;
 
 public class Job implements JobContext {
 	
-	private Configuration config;
 	private String identifier;
 	private int jobID;
 	
-	private Class mapperClass;
-	private Class combinerClass;
-	private Class partitionerClass;
-	private Class reducerClass;
+	private Class<?> mapperClass;
+	private Class<?> combinerClass;
+	private Class<?> partitionerClass;
+	private Class<?> reducerClass;
 	
-	private Class outputKeyClass;
-	private Class outputValueClass;
+	private Class<?> outputKeyClass;
+	private Class<?> outputValueClass;
 	
-	private Class inputFormatClass;
-	private Class outputFormatClass;
+	private Class<?> inputFormatClass;
+	private Class<?> outputFormatClass;
 
-	private Path inputPath;
-	private Path outputPath;
+	private File inputPath;
+	private File outputPath;
 	
 	//private int numOfReduceJobs;
 	//private int numOfMapJobs;
 	private int recordSize;
 	
-	private Job(Configuration config, String identifier) { 
-		//Configuration.addDefaultResource("");
-		this.config = config;
+	private Job(String identifier) { 
 		this.identifier = identifier;
 	}
 	
-	public static Job getInstance(Configuration config, String identifier) {
-		return new Job(config, identifier);
+	public static Job getInstance(String identifier) {
+		return new Job(identifier);
 	}
 	
 	public int getID() {
@@ -52,7 +50,7 @@ public class Job implements JobContext {
 		return this.identifier;
 	}
 	
-	public void setMapperClass(Class mapperClass) {
+	public void setMapperClass(Class<?> mapperClass) {
 		this.mapperClass = mapperClass;
 	}
 	
@@ -60,19 +58,19 @@ public class Job implements JobContext {
 		return this.mapperClass;
 	}
 	
-	public void setCombinerClass(Class combinerClass) {
+	public void setCombinerClass(Class<?> combinerClass) {
 		this.combinerClass = combinerClass;
 	}
 	
-	public void setReducerClass(Class reducerClass) {
+	public void setReducerClass(Class<?> reducerClass) {
 		this.reducerClass = reducerClass;
 	}
 	
-	public Class getReducerClass() {
+	public Class<?> getReducerClass() {
 		return this.reducerClass;
 	}
 	
-	public void setPartitionerClass(Class partitionerClass) {
+	public void setPartitionerClass(Class<?> partitionerClass) {
 		this.partitionerClass = partitionerClass;
 	}
 	
@@ -92,31 +90,31 @@ public class Job implements JobContext {
 		this.outputFormatClass = outputFormatClass;
 	}
 	
-	public Class getOutputFormatClass() {
+	public Class<?> getOutputFormatClass() {
 		return this.outputFormatClass;
 	}
 	
-	public void setOutputKeyClass(Class outputKeyClass) {
+	public void setOutputKeyClass(Class<?> outputKeyClass) {
 		this.outputKeyClass = outputKeyClass;
 	}
 	
-	public void setOutputValueClass(Class outputValueClass) {
+	public void setOutputValueClass(Class<?> outputValueClass) {
 		this.outputValueClass = outputValueClass;
 	}
 	
-	public void setInputPath(Path path) {
+	public void setInputPath(File path) {
 		this.inputPath = path;
 	}
 	
-	public void setOutputPath(Path path) {
+	public void setOutputPath(File path) {
 		this.outputPath = path;
 	}
 	
-	public Path getInputPath() {
+	public File getInputPath() {
 		return this.inputPath;
 	}
 	
-	public Path getOutputPath() {
+	public File getOutputPath() {
 		return this.outputPath;
 	}
 	

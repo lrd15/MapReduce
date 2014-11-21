@@ -1,8 +1,8 @@
 package lib.input;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.file.Path;
 import java.util.StringTokenizer;
 
 public class LineRecordReader extends RecordReader<String, String> {
@@ -18,8 +18,8 @@ public class LineRecordReader extends RecordReader<String, String> {
 	
 	public LineRecordReader(InputSplit split) throws IOException {
 		FileInputSplit fis = (FileInputSplit)split;
-		Path path = fis.getFile();
-		this.file = new RandomAccessFile(path.toFile(), "r");
+		File filename = fis.getFile();
+		this.file = new RandomAccessFile(filename, "r");
 		
 		long start = fis.getStart();
 		file.seek(start);
@@ -28,8 +28,8 @@ public class LineRecordReader extends RecordReader<String, String> {
 		readWholeFile = false;
 	}
 	
-	public LineRecordReader(Path path) throws IOException {
-		this.file = new RandomAccessFile(path.toFile(), "r");
+	public LineRecordReader(File filename) throws IOException {
+		this.file = new RandomAccessFile(filename, "r");
 		file.seek(0);
 		readWholeFile = true;
 	}
