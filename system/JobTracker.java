@@ -27,6 +27,15 @@ public class JobTracker extends Thread {
     private boolean running;
 
     private ServerSocket clientServerSocket, workerServerSocket;
+    
+    public static final String INPUT_DIR = "input";
+    public static final String OUTPUT_DIR = "output";
+    
+    // Make input and output directory
+    static {
+    	new File(INPUT_DIR).mkdirs();
+    	new File(OUTPUT_DIR).mkdirs();
+    }
 
     public JobTracker() throws IOException {
         nextClientID = 0;

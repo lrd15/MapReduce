@@ -27,6 +27,7 @@ public class TaskTrackerClientHandler extends Thread {
         	fromClient = new ObjectInputStream(socket.getInputStream());
         	while (running) {
 				Object obj = fromClient.readObject();
+				FileOutputStream fos = null;
 				if (obj instanceof Signal) {
                     Signal sig = (Signal)obj;
                     switch (sig.getSignal()) {
@@ -34,15 +35,16 @@ public class TaskTrackerClientHandler extends Thread {
                     		System.out.println("Receiving input split...");
                     		String filename = (String)fromClient.readObject();
                     		System.out.println("Received filename: " + filename);
-                    		// Store filename
+                    		fos = new FileOutputStream(
+                    				new File(JobTracker.INPUT_DIR + File.separator + filename));
                     		break;
                     	case SEND_SPLIT_COMPLETED:
-                    		// Close fileoutputstream
+                    		fos.close();
                     		System.out.println("Input split received.");
                     		break;
                     	case SEND_FILE_COMPLETED:
                     		running = false;
-                    		System.out.println("All file splits send. Session ended.");
+                    		System.out.println("All file splits sent. Session ended.");
                     		break;
 						default:
 							System.out.println("Unexpected signal received: " + sig.getSignal());
@@ -50,10 +52,11 @@ public class TaskTrackerClientHandler extends Thread {
                     }
 				}
 				else if (obj instanceof Integer) {
-					int numOfBytes = (Integer)obj;
-					byte[] bytes = (byte[])fromClient.readObject();
-					System.out.println(numOfBytes);
+					int bytesRead = (Integer)obj;
+					byte[] buffer = (byte[])fromClient.readObject();
+					System.out.println(bytesRead);
 					// Write bytes to file
+					fos.write(buffer, 0, bytesRead);
 				}
 			}
         } catch (IOException e) {
