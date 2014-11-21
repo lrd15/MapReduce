@@ -66,15 +66,15 @@ public class JobClient {
 			toWorkers.add(new ObjectOutputStream(socket.getOutputStream()));
 			fromWorkers.add(new ObjectInputStream(socket.getInputStream()));
 		}
+
 		Path inputPath = job.getInputPath();
 		File folder = new File(inputPath.toUri());
 		File[] files = folder.listFiles();
 		splitAndSend(files, toWorkers, fromWorkers);
-		for(ObjectOutputStream oos : toWorkers) {
-			oos.close();
-		}
-		for(ObjectInputStream ois : fromWorkers) {
-			ois.close();
+		
+		for(int i=0; i < toWorkers.size(); i++) {
+			toWorkers.get(i).close();
+			fromWorkers.get(i).close();
 		}
 	}
 
@@ -88,6 +88,7 @@ public class JobClient {
 		int ptr = 0;
 		int numOfWorker = toWorkers.size();
 		
+		//loop through files
 		for(File file : files) {
 			String filename = file.getName();
 			RandomAccessFile inputFile = new RandomAccessFile(filename, "r");
@@ -95,10 +96,12 @@ public class JobClient {
 			long sourceSize = inputFile.length();
 			long bytesPerSplit = sourceSize / numSplits;
 			long remainingBytes = sourceSize % numSplits;
-			int maxReadBufferSize = 64 * 1024; // 64KB
-	
+			int maxReadBufferSize = 8 * 1024; //8KB
+			//loop through splits
 			for (int destIx = 1; destIx <= numSplits; destIx++) {
 				ObjectOutputStream oos = toWorkers.get(ptr);
+				oos.writeObject(new Signal(SigNum.SEND_FILE));
+				oos.writeObject(file.getName());
 				if (bytesPerSplit > maxReadBufferSize) {
 					long numReads = bytesPerSplit / maxReadBufferSize;
 					long numRemainingRead = bytesPerSplit % maxReadBufferSize;
@@ -111,11 +114,15 @@ public class JobClient {
 				} else {
 					readWrite(inputFile, oos, bytesPerSplit);
 				}
-				ptr = (ptr+1) % numOfWorker;
+				oos.writeObject(new Signal(SigNum.SEND_FILE_COMPLETED));
+				ptr = (ptr+1) % numOfWorker; //TODO
 			}
 			if (remainingBytes > 0) {
 				ObjectOutputStream oos = toWorkers.get(ptr);
+				oos.writeObject(new Signal(SigNum.SEND_FILE));
+				oos.writeObject(file.getName());
 				readWrite(inputFile, oos, remainingBytes);
+				oos.writeObject(new Signal(SigNum.SEND_FILE_COMPLETED));
 				ptr = (ptr+1) % numOfWorker;
 			}
 			
@@ -123,11 +130,12 @@ public class JobClient {
 		}
 	}
 
-	private void readWrite(RandomAccessFile raf, ObjectOutputStream bw, long numBytes) throws IOException {
+	private void readWrite(RandomAccessFile raf, ObjectOutputStream oos, long numBytes) throws IOException {
 		byte[] buf = new byte[(int) numBytes];
-		int val = raf.read(buf);
-		if (val != -1) {
-			bw.write(buf);
+		int bytesRead = raf.read(buf);
+		if (bytesRead != -1) {
+			oos.writeObject(new Integer(bytesRead));
+			oos.writeObject(buf);
 		}
 	}
 }
