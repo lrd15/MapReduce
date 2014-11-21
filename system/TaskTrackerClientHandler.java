@@ -27,7 +27,6 @@ public class TaskTrackerClientHandler extends Thread {
         	fromClient = new ObjectInputStream(socket.getInputStream());
         	while (running) {
 				Object obj = fromClient.readObject();
-				FileOutputStream fos = null;
 				if (obj instanceof Signal) {
                     Signal sig = (Signal)obj;
                     switch (sig.getSignal()) {
@@ -35,12 +34,32 @@ public class TaskTrackerClientHandler extends Thread {
                     		System.out.println("Receiving input split...");
                     		String filename = (String)fromClient.readObject();
                     		System.out.println("Received filename: " + filename);
-                    		fos = new FileOutputStream(
+                    		FileOutputStream fos = new FileOutputStream(
                     				new File(JobTracker.INPUT_DIR + File.separator + filename));
-                    		break;
-                    	case SEND_SPLIT_COMPLETED:
-                    		fos.close();
-                    		System.out.println("Input split received.");
+                    		while (true) {
+                    			Object subObj = fromClient.readObject();
+                    			if (subObj instanceof Integer) {
+                					int bytesRead = (Integer)subObj;
+                					byte[] buffer = (byte[])fromClient.readObject();
+                					System.out.println("Bytes received: " + bytesRead);
+                					// Write bytes to file
+                					if (fos == null)
+                						System.out.println("FileOutputStream is null pointer.");
+                					fos.write(buffer, 0, bytesRead);
+                				}
+                    			else if (subObj instanceof Signal) {
+                    				Signal subSig = (Signal)subObj;
+                    				if (subSig.getSignal() == SigNum.SEND_SPLIT_COMPLETED) {
+                    					fos.close();
+                                		System.out.println("Input split received.");
+                                		break;
+                    				}
+                    				else {
+                    					System.out.println("Unexpected signal received: " + sig.getSignal());
+            							break;
+                    				}
+                    			}
+                    		}
                     		break;
                     	case SEND_FILE_COMPLETED:
                     		running = false;
@@ -50,15 +69,6 @@ public class TaskTrackerClientHandler extends Thread {
 							System.out.println("Unexpected signal received: " + sig.getSignal());
 							break;
                     }
-				}
-				else if (obj instanceof Integer) {
-					int bytesRead = (Integer)obj;
-					byte[] buffer = (byte[])fromClient.readObject();
-					System.out.println("Bytes received: " + bytesRead);
-					// Write bytes to file
-					if (fos == null)
-						System.out.println("FileOutputStream is null pointer.");
-					fos.write(buffer, 0, bytesRead);
 				}
 			}
         } catch (IOException e) {
