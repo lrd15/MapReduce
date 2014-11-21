@@ -36,6 +36,9 @@ public class TaskTracker extends Thread {
 
         clientServerSocket = new ServerSocket(self.getPortForClient());
         workerServerSocket = new ServerSocket(self.getPortForWorker());
+        
+        clientHandlerList = new ArrayList<TaskTrackerClientHandler>();
+        workerHandlerList = new ArrayList<TaskTrackerWorkerHandler>();
 
         Host master = Configuration.MASTER;
         socket = new Socket(master.getIPAddress(), master.getPortForWorker());
