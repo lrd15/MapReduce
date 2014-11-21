@@ -21,6 +21,7 @@ public class TaskTracker extends Thread {
     private int nextWorkerID;
 
     private boolean running;
+    private String ipAddress;
 
     private ServerSocket clientServerSocket, workerServerSocket;
 
@@ -28,6 +29,7 @@ public class TaskTracker extends Thread {
         nextClientID = 0;
         nextWorkerID = 0;
         running = true;
+        this.ipAddress = ipAddress;
         Host self = Configuration.getWorkerByAddress(ipAddress);
         if (self == null)
             throw new Exception("This host is not registered.");
@@ -46,13 +48,15 @@ public class TaskTracker extends Thread {
 
     @Override
     public void run() {
-        // Start a separate thread to periodically send heartbeat to job tracker
-        HeartbeatThread heartbeatThread = new HeartbeatThread();
-        heartbeatThread.start();
-        
+    	System.out.println("Task tracker (" + ipAddress + ") running...");
         try {
+        	toHandler = new ObjectOutputStream(socket.getOutputStream());
 			fromHandler = new ObjectInputStream(socket.getInputStream());
-			toHandler = new ObjectOutputStream(socket.getOutputStream());
+			
+			// Start a separate thread to periodically send heartbeat to job tracker
+	        HeartbeatThread heartbeatThread = new HeartbeatThread();
+	        heartbeatThread.start();
+	        
 			while (running) {
 				Object obj = fromHandler.readObject();
 				if (obj instanceof Signal) {
@@ -120,10 +124,12 @@ public class TaskTracker extends Thread {
     private class HeartbeatThread extends Thread {
         @Override
         synchronized public void run() {
+        	System.out.println("Task tracker heartbeat thread started.");
             while (running) {       
                 try {
                 	System.out.println("Sending heartbeat...");
                 	toHandler.writeObject(new Signal(SigNum.HEARTBEAT));
+                	System.out.println("Heartbeat sent");
                     Thread.sleep(Configuration.TIMEOUT / 2);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -144,6 +150,7 @@ public class TaskTracker extends Thread {
                     socket = clientServerSocket.accept();
                     TaskTrackerClientHandler clientHandler = new TaskTrackerClientHandler(nextClientID++, socket);
                     clientHandlerList.add(clientHandler);
+                    clientHandler.start();
                     System.out.println("New client connected: " + socket.getRemoteSocketAddress());
                 } catch (IOException e) {
                     System.err.println("Failed to connect client: " + socket.getRemoteSocketAddress());
@@ -162,6 +169,7 @@ public class TaskTracker extends Thread {
                     socket = workerServerSocket.accept();
                     TaskTrackerWorkerHandler workerHandler = new TaskTrackerWorkerHandler(nextWorkerID++, socket);
                     workerHandlerList.add(workerHandler);
+                    workerHandler.start();
                     System.out.println("New worker connected: " + socket.getRemoteSocketAddress());
                 } catch (IOException e) {
                     System.err.println("Failed to connect worker: " + socket.getRemoteSocketAddress());

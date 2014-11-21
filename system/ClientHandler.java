@@ -23,9 +23,11 @@ public class ClientHandler extends Thread {
 
     @Override
     public void run() {
+    	System.out.println("Client handler #" + id + " running...");
     	try {
+    		toClient = new ObjectOutputStream(socket.getOutputStream());
 	    	fromClient = new ObjectInputStream(socket.getInputStream());
-	        toClient = new ObjectOutputStream(socket.getOutputStream());
+	        
 	        while (running) {
 					Object obj = fromClient.readObject();
 					if (obj instanceof Signal) {

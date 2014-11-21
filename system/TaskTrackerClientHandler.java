@@ -23,8 +23,9 @@ public class TaskTrackerClientHandler extends Thread {
     @Override
     public void run() {
         try {
+        	toClient = new ObjectOutputStream(socket.getOutputStream());
         	fromClient = new ObjectInputStream(socket.getInputStream());
-            toClient = new ObjectOutputStream(socket.getOutputStream());
+            
         } catch (IOException e) {
         	e.printStackTrace();
         }

@@ -71,8 +71,8 @@ public class JobTracker extends Thread {
                                     	System.out.println("Initiating map operation...");
                                         done = initMap(wh, split, job.getID(), i);
                                         if (done) {
-                                        	System.out.println("Worker " + wh.getSocket().getLocalAddress() +
-                                        			" assigned for map operation: JobID = " + job.getID() + ", SplitId = " + i);
+                                        	System.out.println("Worker (" + wh.getSocket().getLocalAddress() +
+                                        			") assigned for map operation: JobID = " + job.getID() + ", SplitId = " + i);
                                         	break;
                                         }
                                         else
@@ -98,8 +98,8 @@ public class JobTracker extends Thread {
                                 	System.out.println("Initiating reduce operatino...");
                                     done = initReduce(wh, partition, job.getID(), idx);
                                     if (done) {
-                                    	System.out.println("Worker " + wh.getSocket().getLocalAddress() +
-                                    			" assigned for reduce operation: JobID = " + job.getID() + ", PartitionId = " + idx);
+                                    	System.out.println("Worker (" + wh.getSocket().getLocalAddress() +
+                                    			") assigned for reduce operation: JobID = " + job.getID() + ", PartitionId = " + idx);
                                     	job.decNumIdle();
                                     	break;
                                     }
@@ -289,11 +289,20 @@ public class JobTracker extends Thread {
         @Override
         synchronized public void run() {
             while (running) {
-                for (WorkerHandler wh : workerHandlerList)
+            	System.out.println("Worker handler list size = " + workerHandlerList.size());
+                for (int i = 0; i < workerHandlerList.size(); i++) {
+                	WorkerHandler wh = workerHandlerList.get(i);
+                	System.out.print("Worker handler #" + wh.getID() + " is ");
+                	if (wh.alive())
+                		System.out.println("alive.");
+                	else
+                		System.out.println("not alive.");
                     if (!wh.alive()) {
                         // Worker Failure
-                    	System.out.println("Worker " + wh.getSocket().getLocalAddress() + " failed.");
+                    	System.out.println("Worker (" + wh.getSocket().getLocalAddress() + ") failed.");
+                    	workerHandlerList.remove(i--);
                     }
+                }
                 try {
                     Thread.sleep(Configuration.TIMEOUT);
                 } catch (InterruptedException e) {
@@ -312,6 +321,7 @@ public class JobTracker extends Thread {
                     socket = clientServerSocket.accept();
                     ClientHandler clientHandler = new ClientHandler(getThis(), nextClientID++, socket);
                     clientHandlerList.add(clientHandler);
+                    clientHandler.start();
                     System.out.println("New client connected: " + socket.getRemoteSocketAddress());
                 } catch (IOException e) {
                     System.err.println("Failed to connect client: " + socket.getRemoteSocketAddress());
@@ -330,6 +340,7 @@ public class JobTracker extends Thread {
                     socket = workerServerSocket.accept();
                     WorkerHandler workerHandler = new WorkerHandler(getThis(), nextWorkerID++, socket);
                     workerHandlerList.add(workerHandler);
+                    workerHandler.start();
                     System.out.println("New worker connected: " + socket.getRemoteSocketAddress());
                 } catch (IOException e) {
                     System.err.println("Failed to connect worker: " + socket.getRemoteSocketAddress());

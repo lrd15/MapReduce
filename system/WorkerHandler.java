@@ -40,11 +40,12 @@ public class WorkerHandler extends Thread {
 
     @Override
     public void run() {
+    	System.out.println("Worker Handler #" + id + " running...");
         try {
         	// Set timeout in ms
 			socket.setSoTimeout(Configuration.TIMEOUT);
+			toWorker = new ObjectOutputStream(socket.getOutputStream());
 			fromWorker = new ObjectInputStream(socket.getInputStream());
-	        toWorker = new ObjectOutputStream(socket.getOutputStream());
 			while (running) {
                 Object obj = fromWorker.readObject();
                 if (obj instanceof Signal) {
@@ -83,9 +84,11 @@ public class WorkerHandler extends Thread {
                     }
                 }
             } 
-		} catch (SocketException e1) {
+		} catch (SocketException e) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			e.printStackTrace();
+			alive = false;
+            running = false;
 		} catch (SocketTimeoutException e) { // Timeout -> tracker dies
             alive = false;
             running = false;
@@ -95,8 +98,9 @@ public class WorkerHandler extends Thread {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			alive = false;
+			running = false;
 		}
-        master.removeWorkerHandler(this);
     }
     
     synchronized public Object readObject() throws ClassNotFoundException, IOException {
