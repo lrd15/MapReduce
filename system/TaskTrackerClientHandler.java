@@ -40,6 +40,10 @@ public class TaskTrackerClientHandler extends Thread {
                     			Object subObj = fromClient.readObject();
                     			if (subObj instanceof Integer) {
                 					int bytesRead = (Integer)subObj;
+                					if (bytesRead == -1) {
+                						fos.close();
+                						break;
+                					}
                 					byte[] buffer = (byte[])fromClient.readObject();
                 					System.out.println("Bytes received: " + bytesRead);
                 					// Write bytes to file
@@ -47,17 +51,12 @@ public class TaskTrackerClientHandler extends Thread {
                 						System.out.println("FileOutputStream is null pointer.");
                 					fos.write(buffer, 0, bytesRead);
                 				}
-                    			else if (subObj instanceof Signal) {
-                    				Signal subSig = (Signal)subObj;
-                    				if (subSig.getSignal() == SigNum.SEND_SPLIT_COMPLETED) {
-                    					fos.close();
-                                		System.out.println("Input split received.");
-                                		break;
-                    				}
-                    				else {
-                    					System.out.println("Unexpected signal received: " + sig.getSignal());
-            							break;
-                    				}
+                    			else {
+                    				if (subObj instanceof Signal)
+                    					System.out.println("Unexpected signal received: " + ((Signal)subObj).getSignal());
+                    				else
+                    					System.out.println("Unexpected object received.");
+                    				break;
                     			}
                     		}
                     		break;
