@@ -25,6 +25,11 @@ public class TaskTracker extends Thread {
     private String ipAddress;
 
     private ServerSocket clientServerSocket, workerServerSocket;
+    
+    static {
+    	new File(JobTracker.INPUT_DIR).mkdirs();
+    	new File(JobTracker.OUTPUT_DIR).mkdirs();
+    }
 
     public TaskTracker(String ipAddress) throws Exception {
         nextClientID = 0;
