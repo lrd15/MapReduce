@@ -1,12 +1,10 @@
 package lib.input;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import config.Configuration;
-
 import system.Host;
+import config.Configuration;
 
 
 public class FileInputSplit extends InputSplit {
@@ -15,20 +13,20 @@ public class FileInputSplit extends InputSplit {
 
 	private static int hostItr = 0;
 	
-	private File file;
+	private String filename;
 	private long start;
 	private long length;
 	private ArrayList<Host> hosts;
 	
-	public FileInputSplit(File file, long start, long length){
-		this.file = file;
+	public FileInputSplit(String filename, long start, long length){
+		this.filename = filename;
 		this.start = start;
 		this.length = length;
 		this.hosts = Configuration.WORKERS;
 	}
 	
-	public File getFile() throws IOException {
-		return this.file;
+	public String getFilename() throws IOException {
+		return this.filename;
 	}
 	
 	public long getStart() throws IOException {

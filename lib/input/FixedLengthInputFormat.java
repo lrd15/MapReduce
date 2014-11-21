@@ -9,8 +9,8 @@ import config.Job;
 public class FixedLengthInputFormat extends InputFormat<Long, String> {
 
 	@Override
-	public RecordReader<Long, String> getRecordReader(Job job, InputSplit split) throws IOException {
-		return new FixedLengthRecordReader(split, job.getRecordSize());
+	public RecordReader<Long, String> getRecordReader(Job job, String path, InputSplit split) throws IOException {
+		return new FixedLengthRecordReader(path, split, job.getRecordSize());
 	}
 
 	@Override
@@ -28,7 +28,7 @@ public class FixedLengthInputFormat extends InputFormat<Long, String> {
 			System.out.println("Number of splits per file: " + numSplits);
 			System.out.println("Number of length per split: " + length);
 			for(int i=0; i<numSplits; i++) {
-				splits[i] = new FileInputSplit(file, start, length);
+				splits[i] = new FileInputSplit(file.getName(), start, length);
 				start += length;
 			}
 		}

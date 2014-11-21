@@ -16,10 +16,9 @@ public class LineRecordReader extends RecordReader<String, String> {
 	private String key;
 	private String value;
 	
-	public LineRecordReader(InputSplit split) throws IOException {
+	public LineRecordReader(String path, InputSplit split) throws IOException {
 		FileInputSplit fis = (FileInputSplit)split;
-		File filename = fis.getFile();
-		this.file = new RandomAccessFile(filename, "r");
+		this.file = new RandomAccessFile(new File(path+File.separator+fis.getFilename()), "r");
 		
 		long start = fis.getStart();
 		file.seek(start);
