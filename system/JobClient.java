@@ -6,7 +6,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.net.Socket;
-import java.nio.file.Path;
 import java.util.ArrayList;
 
 import lib.input.InputFormat;
@@ -68,8 +67,7 @@ public class JobClient {
 			fromWorkers.add(new ObjectInputStream(socket.getInputStream()));
 		}
 
-		Path inputPath = job.getInputPath();
-		File folder = new File(inputPath.toUri());
+		File folder = job.getInputPath();
 		File[] files = folder.listFiles();
 		splitAndSend(files, toWorkers, fromWorkers);
 		

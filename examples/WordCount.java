@@ -1,8 +1,7 @@
 package examples;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
 import java.util.StringTokenizer;
 
 import lib.input.FixedLengthInputFormat;
@@ -12,7 +11,6 @@ import mapreduce2.MapContext;
 import mapreduce2.Mapper;
 import mapreduce2.ReduceContext;
 import mapreduce2.Reducer;
-import config.Configuration;
 import config.Job;
 
 public class WordCount {
@@ -40,20 +38,15 @@ public class WordCount {
 	}
 
 	public static void main(String[] args) throws Exception {
-		//TODO: hard code here
-		Path path1 = FileSystems.getDefault().getPath("test");
-		Path path2 = FileSystems.getDefault().getPath("output");
+		File path1 = new File("test/");
+		File path2 = new File("output/");
 		
-		Configuration conf = new Configuration();
-		Job job = Job.getInstance(conf, "wordcount");
+		Job job = Job.getInstance("wordcount");
 		
 		job.setMapperClass(TokenizerMapper.class);
 		job.setReducerClass(IntSumReducer.class);
 		job.setPartitionerClass(HashPartitioner.class);
-		//job.setOutputKeyClass(String.class);
-		//job.setOutputValueClass(Integer.class);
 		job.setRecordSize(11);
-		//job.setNumOfReduceJobs(3);
 		
 		job.setInputPath(path1);
 		job.setOutputPath(path2);
