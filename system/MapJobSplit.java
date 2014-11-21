@@ -1,4 +1,11 @@
+<<<<<<< HEAD
 import lib.input.InputSplit;
+=======
+package system;
+
+import lib.input.InputSplit;
+
+>>>>>>> 6cee863f1d684df967004f386d2738fc7a9c9bcb
 class MapJobSplit {
         InputSplit split;
         JobState state;
@@ -39,7 +46,7 @@ class MapJobSplit {
 
         public int getWorkerID() {
             return workerID;
-        }
+        }									
 
         public void setWorkerID(int id) {
             workerID = id;

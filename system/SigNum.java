@@ -7,5 +7,5 @@ public enum SigNum {
 	INIT_MAP,
 	INIT_REDUCE,
 	ADD_JOB,
-    ADD_JOB_COMPLETED
+	ADD_JOB_COMPLETED
 }

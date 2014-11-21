@@ -2,21 +2,27 @@ package lib.input;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+
+import config.Configuration;
 
 import system.Host;
 
 
 public class FileInputSplit extends InputSplit {
 	
+	private static int hostItr = 0;
+	
 	private Path file;
 	private long start;
 	private long length;
-	//private String[] hosts;
+	private ArrayList<Host> hosts;
 	
 	public FileInputSplit(Path file, long start, long length){
 		this.file = file;
 		this.start = start;
 		this.length = length;
+		this.hosts = Configuration.WORKERS;
 	}
 	
 	public Path getFile() throws IOException {
@@ -33,8 +39,9 @@ public class FileInputSplit extends InputSplit {
 
 	@Override
 	public Host[] getLocations() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		Host[] host = new Host[]{hosts.get(hostItr)};
+		hostItr = (hostItr+1) % hosts.size();
+		return host;
 	}
 	
 }

@@ -6,7 +6,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.InetAddress;
 
+<<<<<<< HEAD
 import lib.input.InputSplit;
+=======
+>>>>>>> 6cee863f1d684df967004f386d2738fc7a9c9bcb
 import config.Configuration;
 
 public class TaskTracker extends Thread {
@@ -22,24 +25,21 @@ public class TaskTracker extends Thread {
 
     private boolean running;
 
-    private Configuration conf;
-
     private ServerSocket clientServerSocket, workerServerSocket;
 
-    public TaskTracker(Configuration conf) throws Exception {
+    public TaskTracker() throws Exception {
         nextClientID = 0;
         nextWorkerID = 0;
         running = true;
-        this.conf = conf;
-        Host self = conf.getWorkerByAddress(InetAddress.getLocalHost().getHostAddress());
+        Host self = Configuration.getWorkerByAddress(InetAddress.getLocalHost().getHostAddress());
         if (self == null)
             throw new Exception("This host is not registered.");
 
         clientServerSocket = new ServerSocket(self.getPortForClient());
         workerServerSocket = new ServerSocket(self.getPortForWorker());
 
-
-        socket = new Socket(conf.getMaster().getIPAddress(), conf.getMaster().getPortForWorker());
+        Host master = Configuration.MASTER;
+        socket = new Socket(master.getIPAddress(), master.getPortForWorker());
         fromHandler = new ObjectInputStream(socket.getInputStream());
         toHandler = new ObjectOutputStream(socket.getOutputStream());
 

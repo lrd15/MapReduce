@@ -11,14 +11,11 @@ public class TaskTrackerWorkerHandler extends Thread {
     private ObjectInputStream fromWorker;
     private ObjectOutputStream toWorker;
 
-    private Configuration conf;
-
     private boolean running;
 
-    public TaskTrackerWorkerHandler(Configuration conf, int id, Socket socket) {
+    public TaskTrackerWorkerHandler(int id, Socket socket) throws IOException {
         this.id = id;
         this.socket = socket;
-        this.conf = conf;
         running = true;
         this.socket = socket;
         fromWorker = new ObjectInputStream(socket.getInputStream());
