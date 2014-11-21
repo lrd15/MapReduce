@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
+import config.Configuration;
+
 public class WorkerHandler extends Thread {
     // Status codes
     public static final int MAP_JOB = 1;

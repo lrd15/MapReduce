@@ -1,3 +1,4 @@
+import lib.input.InputSplit;
 class MapJobSplit {
         InputSplit split;
         JobState state;

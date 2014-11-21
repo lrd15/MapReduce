@@ -1,3 +1,4 @@
+import lib.input.InputSplit;
 public class MapJob {
     int id;
     MapJobSplit[] jobSplits;
