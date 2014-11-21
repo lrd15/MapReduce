@@ -72,6 +72,7 @@ public class JobClient {
 		splitAndSend(files, toWorkers, fromWorkers);
 		
 		for(int i=0; i < toWorkers.size(); i++) {
+			toWorkers.get(i).writeObject(new Signal(SigNum.SEND_FILE_COMPLETED));
 			toWorkers.get(i).close();
 			fromWorkers.get(i).close();
 		}
@@ -101,7 +102,7 @@ public class JobClient {
 			for (int destIx = 1; destIx <= numSplits; destIx++) {
 				System.out.println("Sending split: " + destIx);
 				ObjectOutputStream oos = toWorkers.get(ptr);
-				oos.writeObject(new Signal(SigNum.SEND_FILE));
+				oos.writeObject(new Signal(SigNum.SEND_SPLIT));
 				oos.writeObject(file.getName());
 				if (bytesPerSplit > maxReadBufferSize) {
 					long numReads = bytesPerSplit / maxReadBufferSize;
@@ -115,15 +116,15 @@ public class JobClient {
 				} else {
 					readWrite(inputFile, oos, bytesPerSplit);
 				}
-				oos.writeObject(new Signal(SigNum.SEND_FILE_COMPLETED));
+				oos.writeObject(new Signal(SigNum.SEND_SPLIT_COMPLETED));
 				ptr = (ptr+1) % numOfWorker; //TODO
 			}
 			if (remainingBytes > 0) {
 				ObjectOutputStream oos = toWorkers.get(ptr);
-				oos.writeObject(new Signal(SigNum.SEND_FILE));
+				oos.writeObject(new Signal(SigNum.SEND_SPLIT));
 				oos.writeObject(file.getName());
 				readWrite(inputFile, oos, remainingBytes);
-				oos.writeObject(new Signal(SigNum.SEND_FILE_COMPLETED));
+				oos.writeObject(new Signal(SigNum.SEND_SPLIT_COMPLETED));
 				ptr = (ptr+1) % numOfWorker;
 			}
 			
