@@ -26,8 +26,21 @@ public class TaskTrackerWorkerHandler extends Thread {
        	try {
        		toWorker = new ObjectOutputStream(socket.getOutputStream());
 			fromWorker = new ObjectInputStream(socket.getInputStream());
-			
+			while (running) {
+				Object obj = fromWorker.readObject();
+				if (obj instanceof Signal) {
+                    Signal sig = (Signal)obj;
+                    switch (sig.getSignal()) {
+						default:
+							System.out.println("Unexpected signal received: " + sig.getSignal());
+							break;
+                    }
+				}
+			}
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
