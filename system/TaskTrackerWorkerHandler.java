@@ -24,14 +24,6 @@ public class TaskTrackerWorkerHandler extends Thread {
 
     @Override
     public void run() {
-        while (running) {
-            Object obj = fromWorker.readObject();
-            if (obj instanceof Signal) {
-                Signal sig = (Signal)obj;
-                switch (sig.getSignal()) {
-                
-                }
-            }
-        }
+        
     }
 }

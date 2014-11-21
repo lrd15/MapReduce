@@ -2,6 +2,7 @@ package system;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
 import config.Configuration;
@@ -41,9 +42,10 @@ public class WorkerHandler extends Thread {
 
     @Override
     public void run() {
-        socket.setSoTimeout(conf.TIMEOUT); // Set timeout in ms
-        while (running) {
-            try {
+        try {
+        	// Set timeout in ms
+			socket.setSoTimeout(Configuration.TIMEOUT);
+			while (running) {
                 Object obj = fromWorker.readObject();
                 if (obj instanceof Signal) {
                     Signal sig = (Signal)obj;
@@ -55,39 +57,50 @@ public class WorkerHandler extends Thread {
                             // Code to get filenames
 
                             String[] filenames = null; // TODO
-                            MapJob job = master.getMapJob(jobID);
-                            MapJobSplit split = job.getSplit(idx);
+                            MapJob mapJob = master.getMapJob(jobID);
+                            MapJobSplit split = mapJob.getSplit(idx);
                             split.setJobState(JobState.COMPLETED);
                             setWorkerState(WorkerState.IDLE);
                             split.setIntermediateFilenames(filenames);
-                            job.incNumCompleted();
-                            if (job.isCompleted())
-                                master.migrate(job);
+                            mapJob.incNumCompleted();
+                            if (mapJob.isCompleted())
+                                master.migrate(mapJob);
                             break;
                         case REDUCE_COMPLETED:
-                            ReduceJob job = master.getReduceJob(jobID);
-                            ReducePartition partition = job.getPartition(idx);
+                            ReduceJob reduceJob = master.getReduceJob(jobID);
+                            ReducePartition partition = reduceJob.getPartition(idx);
                             partition.setJobState(JobState.COMPLETED);
                             setWorkerState(WorkerState.IDLE);
-                            job.incNumCompleted();
-                            if (job.isCompleted())
-                                master.removeReduceJob(job);
+                            reduceJob.incNumCompleted();
+                            if (reduceJob.isCompleted())
+                                master.removeReduceJob(reduceJob);
                             break;
+                        default:
+                        	break;
                     }
                 }
-            } catch (SocketTimeoutException e) { // Timeout -> tracker dies
-                alive = false;
-                running = false;
-            }
-        }
+            } 
+		} catch (SocketException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (SocketTimeoutException e) { // Timeout -> tracker dies
+            alive = false;
+            running = false;
+        } catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         master.removeWorkerHandler(this);
     }
 
-    synchronized public Object readObject() {
+    synchronized public Object readObject() throws ClassNotFoundException, IOException {
         return fromWorker.readObject();
     }
 
-    synchronized public void writeObject(Object obj) {
+    synchronized public void writeObject(Object obj) throws IOException {
         toWorker.writeObject(obj);
     }
 

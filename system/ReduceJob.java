@@ -1,3 +1,5 @@
+package system;
+
 public class ReduceJob {
     int id;
     int curPartition;
@@ -42,7 +44,7 @@ public class ReduceJob {
     public int nextIdlePartitionIdx() {
         if (!hasNextIdlePartition())
             return -1;
-        while (partitions[curPartition].getState() != JobState.IDLE) {
+        while (partitions[curPartition].getJobState() != JobState.IDLE) {
             curPartition = (curPartition + 1) % partitions.length;
         }
         return curPartition++;

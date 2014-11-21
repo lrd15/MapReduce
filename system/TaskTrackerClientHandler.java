@@ -24,14 +24,6 @@ public class TaskTrackerClientHandler extends Thread {
 
     @Override
     public void run() {
-        while (running) {
-            Object obj = fromClient.readObject();
-            if (obj instanceof Signal) {
-                Signal sig = (Signal)obj;
-                switch (sig.getSignal()) {
-                
-                }
-            }
-        }
+        
     }
 }

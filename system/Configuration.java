@@ -1,3 +1,5 @@
+package system;
+
 import java.util.ArrayList;
 public class Configuration {
     // public final int CLIENT_PORT = 15640;
@@ -15,7 +17,7 @@ public class Configuration {
 
     public Host getWorkerByAddress(String ipAddress) {
         for (Host h : workerList)
-            if (h.getAddress().getHostAddress().equals(ipAddress))
+            if (h.getIPAddress().getHostAddress().equals(ipAddress))
                 return h;
         return null;
     }

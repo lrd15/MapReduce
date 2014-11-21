@@ -1,3 +1,5 @@
+package system;
+
 import lib.input.InputSplit;
 public class MapJob {
     int id;
