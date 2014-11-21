@@ -45,14 +45,11 @@ public class ClientHandler extends Thread {
 		                    	break;
 		                    case ADD_JOB_COMPLETED:
 		                    	System.out.println("Splits sending completed.");
-		                        Object splitsObj = fromClient.readObject();
-		                        if (splitsObj instanceof InputSplit[]) {
-		                            InputSplit[] splits = (InputSplit[])splitsObj;
-		                            MapJob mapJob = new MapJob(id, splits);
-		                            master.addMapJob(mapJob);
-		                            running = false; // End this session
-		                            System.out.println("Input splits received. Client session ends.");
-		                        }
+		                    	InputSplit[] splits = (InputSplit[])fromClient.readObject();
+	                            MapJob mapJob = new MapJob(id, splits);
+	                            master.addMapJob(mapJob);
+	                            running = false; // End this session
+	                            System.out.println("Input splits received. Client session ended.");
 		                        break;
 		                    default:
 		                    	System.out.println("Unexpected signal received: " + sig.getSignal());

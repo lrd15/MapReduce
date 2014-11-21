@@ -30,13 +30,19 @@ public class TaskTrackerClientHandler extends Thread {
 				if (obj instanceof Signal) {
                     Signal sig = (Signal)obj;
                     switch (sig.getSignal()) {
-                    	case SEND_FILE:
+                    	case SEND_SPLIT:
+                    		System.out.println("Receiving input split...");
                     		String filename = (String)fromClient.readObject();
-                    		System.out.println(filename);
+                    		System.out.println("Received filename: " + filename);
                     		// Store filename
                     		break;
-                    	case SEND_FILE_COMPLETED:
+                    	case SEND_SPLIT_COMPLETED:
                     		// Close fileoutputstream
+                    		System.out.println("Input split received.");
+                    		break;
+                    	case SEND_FILE_COMPLETED:
+                    		running = false;
+                    		System.out.println("All file splits send. Session ended.");
                     		break;
 						default:
 							System.out.println("Unexpected signal received: " + sig.getSignal());
