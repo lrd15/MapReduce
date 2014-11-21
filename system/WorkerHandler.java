@@ -52,13 +52,12 @@ public class WorkerHandler extends Thread {
                     Signal sig = (Signal)obj;
                     switch (sig.getSignal()) {
                         case HEARTBEAT:
-                        	System.out.println("Received heartbeat.");
+//                        	System.out.println("Received heartbeat.");
                             alive = true;
                             break;
                         case MAP_COMPLETED:
                         	System.out.println("Received MAP_COMPLETED signal.");
-                            // Code to get filenames
-                            String[] filenames = null; // TODO
+                            String[] filenames = (String[])fromWorker.readObject();
                             MapJob mapJob = master.getMapJob(jobID);
                             MapJobSplit split = mapJob.getSplit(idx);
                             split.setJobState(JobState.COMPLETED);
@@ -75,8 +74,10 @@ public class WorkerHandler extends Thread {
                             partition.setJobState(JobState.COMPLETED);
                             setWorkerState(WorkerState.IDLE);
                             reduceJob.incNumCompleted();
-                            if (reduceJob.isCompleted())
+                            if (reduceJob.isCompleted()) {
                                 master.removeReduceJob(reduceJob);
+                                master.removeJob(reduceJob.getID());
+                            }
                             break;
                         default:
                         	System.out.println("Unexpected signal received: " + sig.getSignal());
@@ -85,18 +86,16 @@ public class WorkerHandler extends Thread {
                 }
             } 
 		} catch (SocketException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.out.println("Worker (" + socket.getLocalAddress() + ") failed.");
 			alive = false;
             running = false;
 		} catch (SocketTimeoutException e) { // Timeout -> tracker dies
             alive = false;
             running = false;
         } catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			alive = false;
 			running = false;

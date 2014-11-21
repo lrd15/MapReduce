@@ -2,14 +2,17 @@ package system;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 import config.Configuration;
+import config.Job;
 
 public class JobTracker extends Thread {
     private ArrayList<WorkerHandler> workerHandlerList;
     private ArrayList<ClientHandler> clientHandlerList;
+    private HashMap<Integer, Job> jobMap;
 
     private ArrayList<MapJob> mapJobList;
     private ArrayList<ReduceJob> reduceJobList;
@@ -34,6 +37,7 @@ public class JobTracker extends Thread {
 
         workerHandlerList = new ArrayList<WorkerHandler>();
         clientHandlerList = new ArrayList<ClientHandler>();
+        jobMap = new HashMap<Integer, Job>();
         mapJobList = new ArrayList<MapJob>();
         reduceJobList = new ArrayList<ReduceJob>();
         clientServerSocket = new ServerSocket(Configuration.MASTER.getPortForClient());
@@ -116,6 +120,18 @@ public class JobTracker extends Thread {
         }
     }
     
+    public void addJob(Job job) {
+    	jobMap.put(job.getID(), job);
+    }
+    
+    public Job getJob(int id) {
+    	return jobMap.get(id);
+    }
+    
+    public void removeJob(int id) {
+    	jobMap.remove(id);
+    }
+    
     public void removeWorkerHandler(WorkerHandler wh) {
     	workerHandlerList.remove(wh);
     }
@@ -173,6 +189,7 @@ public class JobTracker extends Thread {
             int jobID, int splitIdx) {
         try {
 			wh.writeObject(new Signal(SigNum.INIT_MAP));
+			wh.writeObject(getJob(jobID));
 			wh.writeObject(split.getInputSplit());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -189,6 +206,7 @@ public class JobTracker extends Thread {
             int jobID, int partitionIdx) {
         try {
         	wh.writeObject(new Signal(SigNum.INIT_REDUCE));
+        	wh.writeObject(getJob(jobID));
 			wh.writeObject(partition);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -289,14 +307,14 @@ public class JobTracker extends Thread {
         @Override
         synchronized public void run() {
             while (running) {
-            	System.out.println("Worker handler list size = " + workerHandlerList.size());
+//            	System.out.println("Worker handler list size = " + workerHandlerList.size());
                 for (int i = 0; i < workerHandlerList.size(); i++) {
                 	WorkerHandler wh = workerHandlerList.get(i);
-                	System.out.print("Worker handler #" + wh.getID() + " is ");
-                	if (wh.alive())
-                		System.out.println("alive.");
-                	else
-                		System.out.println("not alive.");
+//                	System.out.print("Worker handler #" + wh.getID() + " is ");
+//                	if (wh.alive())
+//                		System.out.println("alive.");
+//                	else
+//                		System.out.println("not alive.");
                     if (!wh.alive()) {
                         // Worker Failure
                     	System.out.println("Worker (" + wh.getSocket().getLocalAddress() + ") failed.");

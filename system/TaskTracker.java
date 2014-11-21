@@ -8,6 +8,7 @@ import java.net.InetAddress;
 
 import lib.input.InputSplit;
 import config.Configuration;
+import config.Job;
 
 public class TaskTracker extends Thread {
     private ArrayList<TaskTrackerWorkerHandler> workerHandlerList;
@@ -42,6 +43,8 @@ public class TaskTracker extends Thread {
 
         Host master = Configuration.MASTER;
         socket = new Socket(master.getIPAddress(), master.getPortForWorker());
+        System.out.println("Connected to Job Tracker (" +
+        		master.getIPAddress().getHostAddress() + ":" + master.getPortForWorker() + ")");
 
         ClientListener clientListener = new ClientListener();
         clientListener.start();
@@ -64,38 +67,36 @@ public class TaskTracker extends Thread {
 				Object obj = fromHandler.readObject();
 				if (obj instanceof Signal) {
 	                Signal sig = (Signal)obj;
+	                Job job = null;
+	                boolean success = false;
 	                switch (sig.getSignal()) {
 	                    case INIT_MAP:
 	                    	System.out.println("New map request coming...");
-	                        Object splitObj = fromHandler.readObject();
-	                        if (splitObj instanceof InputSplit) {
-	                            InputSplit inputSplit = (InputSplit)splitObj;
-	                            boolean success = doMap(inputSplit);
-	                            if (success) {
-	                            	System.out.println("Map operation completed.");
-	                                toHandler.writeObject(new Signal(SigNum.MAP_COMPLETED));
-	                                // Send object "String[conf.NUM_OF_REDUCERS] filenames" - abby
-	                            }
-	                            else {
-	                            	System.out.println("Map operation failed.");
-	                            }
-	                        }
+	                    	job = (Job)fromHandler.readObject();
+	                    	InputSplit inputSplit = (InputSplit)fromHandler.readObject();
+	                    	String[] filenames = new String[Configuration.NUM_OF_REDUCERS];
+                            success = doMap(job, inputSplit, filenames);
+                            if (success) {
+                            	System.out.println("Map operation completed.");
+                                toHandler.writeObject(new Signal(SigNum.MAP_COMPLETED));
+                                toHandler.writeObject(filenames);
+                            }
+                            else {
+                            	System.out.println("Map operation failed.");
+                            }
 	                        break;
 	                    case INIT_REDUCE:
-	                        // Code here
 	                    	System.out.println("New reduce request coming...");
-	                    	Object partitionObj = fromHandler.readObject();
-							if (partitionObj instanceof ReducePartition) {
-	                            ReducePartition partition = (ReducePartition)partitionObj;
-	                            boolean success = doReduce(partition);
-	                            if (success) {
-	                            	System.out.println("Reduce operation completed.");
-	                                toHandler.writeObject(new Signal(SigNum.REDUCE_COMPLETED));
-	                            }
-	                            else {
-	                            	System.out.println("Reduce operation failed.");
-	                            }
-	                        }
+	                    	job = (Job)fromHandler.readObject();
+	                    	ReducePartition partition = (ReducePartition)fromHandler.readObject();
+                            success = doReduce(job, partition);
+                            if (success) {
+                            	System.out.println("Reduce operation completed.");
+                                toHandler.writeObject(new Signal(SigNum.REDUCE_COMPLETED));
+                            }
+                            else {
+                            	System.out.println("Reduce operation failed.");
+                            }
 	                        break;
 	                    default:
 	                    	System.out.println("Unexpected signal received: " + sig.getSignal());
@@ -104,7 +105,6 @@ public class TaskTracker extends Thread {
 				}
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -112,13 +112,13 @@ public class TaskTracker extends Thread {
     }
 
     // Return true if successful
-    private boolean doMap(InputSplit inputSplit) {
+    private boolean doMap(Job job, InputSplit inputSplit, String[] filenames) {
         // TODO by abby
     	return true;
     }
 
     // Return true if successful
-    private boolean doReduce(ReducePartition partition) {
+    private boolean doReduce(Job job, ReducePartition partition) {
         // TODO by abby
     	return true;
     }

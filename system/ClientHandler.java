@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.Socket;
 
 import lib.input.InputSplit;
+import config.Job;
 
 public class ClientHandler extends Thread {
     private int id;
@@ -38,13 +39,17 @@ public class ClientHandler extends Thread {
 		                        toClient.writeObject(new Integer(id));
 		                        System.out.println("Assign job id: " + id);
 		                        break;
+		                    case SEND_JOB_CONTEXT:
+		                    	Job job = (Job)fromClient.readObject();
+		                    	master.addJob(job);
+		                    	break;
 		                    case ADD_JOB_COMPLETED:
 		                    	System.out.println("Splits sending completed.");
 		                        Object splitsObj = fromClient.readObject();
 		                        if (splitsObj instanceof InputSplit[]) {
 		                            InputSplit[] splits = (InputSplit[])splitsObj;
-		                            MapJob job = new MapJob(id, splits);
-		                            master.addMapJob(job);
+		                            MapJob mapJob = new MapJob(id, splits);
+		                            master.addMapJob(mapJob);
 		                            running = false; // End this session
 		                            System.out.println("Input splits received. Client session ends.");
 		                        }
