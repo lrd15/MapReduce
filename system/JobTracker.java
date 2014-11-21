@@ -59,11 +59,8 @@ public class JobTracker extends Thread {
                     if (hasMapJob()) {
                         MapJob job = getCurrentMapJob();
                         MapJobSplit[] splits = job.getSplits();
-                        boolean mapCompleted = true;
                         for (int i = 0; i < splits.length; i++) {
                             MapJobSplit split = splits[i];
-                            if (split.getJobState() != JobState.COMPLETED)
-                                mapCompleted = false;
                             if (split.getJobState() != JobState.IDLE)
                                 continue;
                             Host[] hosts = split.getInputSplit().getLocations();
@@ -78,10 +75,6 @@ public class JobTracker extends Thread {
                             if (done)
                                 break;
                         }
-                        if (mapCompleted) {
-                            migrate(job); // Migrate job from mapJobList to reduceJobList
-                            mapJobList.remove(job);
-                        }
                     }
                 }
                 else {
@@ -93,6 +86,7 @@ public class JobTracker extends Thread {
                             for (WorkerHandler wh : workerHandlerList)
                                 if (wh.isIdle()) { // Found idle worker
                                     initReduce(wh, partition, job.getID(), idx);
+                                    job.decNumIdle();
                                     done = true;
                                     break;
                                 }
@@ -106,18 +100,48 @@ public class JobTracker extends Thread {
         }
     }
 
-    public ReducePartition getReducePartition(int jobID,
-            int partitionIdx) {
+    public void addMapJob(MapJob job) {
+        mapJobList.add(job);
+    }
+
+    public void addReduceJob(ReduceJob job) {
+        reduceJobList.add(job);
+    }
+
+    public void removeReduceJob(ReduceJob job) {
+        reduceJobList.remove(job);
+    }
+
+    public void removeMapJob(MapJob job) {
+        mapJobList.remove(job);
+    }
+
+    public ReduceJob getReduceJob(int jobID) {
         for (ReduceJob job : reduceJobList)
             if (job.getID() == jobID)
-                return job.getPartition(partitionIdx);
+                return job;
+        return null;
+    }
+
+    public ReducePartition getReducePartition(int jobID,
+            int partitionIdx) {
+        ReduceJob job = getReduceJob(jobID);
+        if (job != null)
+            return job.getPartition(partitionIdx);
+        return null;
+    }
+
+    public MapJob getMapJob(int jobID) {
+        for (MapJob job : mapJobList)
+            if (job.getID() == jobID)
+                return job;
         return null;
     }
 
     public MapJobSplit getMapJobSplit(int jobID, int splitIdx) {
-        for (MapJob job : mapJobList)
-            if (job.getID() == jobID)
-                return job.getSplit(splitIdx);
+        MapJob job = getMapJob(jobID);
+        if (job != null)
+            return job.getSplit(splitIdx);
         return null;
     }
 
@@ -165,7 +189,8 @@ public class JobTracker extends Thread {
                 filenameList.toArray(new String[filenameList.size()]));
         }
         ReduceJob reduceJob = new ReduceJob(mapJob.getID(), partitions);
-        reduceJobList.add(reduceJob);
+        addReduceJob(reduceJob);
+        removeMapJob(mapJob);
     }
 
     private void advanceMapIdx() {
@@ -219,6 +244,14 @@ public class JobTracker extends Thread {
 
     private JobTracker getThis() {
         return this;
+    }
+
+    public void removeWorkerHandler(WorkerHandler wh) {
+        workerHandlerList.remove(wh);
+    }
+
+    public void removeClientHandler(ClientHandler ch) {
+        clientHandlerList.remove(ch);
     }
 
     // Check whether workers are alive

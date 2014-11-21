@@ -67,9 +67,6 @@ public class TaskTracker extends Thread {
                                 // Send object "String[conf.NUM_OF_REDUCERS] filenames" - abby
                             }
                         }
-                        else {
-                            // error
-                        }
                         break;
                     case INIT_REDUCE:
                         // Code here
@@ -77,10 +74,8 @@ public class TaskTracker extends Thread {
                         if (partitionObj instanceof ReducePartition) {
                             ReducePartition partition = (ReducePartition)partitionObj;
                             boolean success = doReduce(partition);
-                            if (success) {
+                            if (success)
                                 toHandler.writeObject(new Signal(REDUCE_COMPLETED));
-                                // No other information to send
-                            }
                         }
                         break;
                 

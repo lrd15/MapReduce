@@ -1,9 +1,11 @@
 public class MapJob {
     int id;
     MapJobSplit[] jobSplits;
+    int numCompleted;
 
     public MapJob(int id, InputSplit[] splits) {
         this.id = id;
+        numCompleted = 0;
         int n = splits.length;
         jobSplits = new MapJobSplit[n];
         for (int i = 0; i < n; i++)
@@ -12,6 +14,14 @@ public class MapJob {
 
     public int getID() {
         return id;
+    }
+
+    public boolean isCompleted() {
+        return numCompleted == jobSplits.length;
+    }
+
+    synchronized public void incNumCompleted() {
+        numCompleted++;
     }
 
     public MapJobSplit[] getSplits() {
