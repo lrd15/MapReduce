@@ -24,6 +24,7 @@ public class FileRecordWriter extends RecordWriter<String, String> {
 
 	@Override
 	public void write(String key, String value) throws IOException {
+		System.out.println("FileRecordWriter: write");
 		this.writer.println(key + delimiter + value);
 	}
 

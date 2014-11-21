@@ -13,6 +13,7 @@ public class FileOutputFormat extends OutputFormat<String, String> {
 	
 	@Override
 	public RecordWriter<String, String> getRecordWriter(Job job) throws IOException {
+		System.out.println("FileOutputFormat: getRecordWriter");
 		Path path = job.getOutputPath();
 		return new FileRecordWriter(path, "/hardcode"+(index++));
 	}

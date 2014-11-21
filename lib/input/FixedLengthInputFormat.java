@@ -18,6 +18,7 @@ public class FixedLengthInputFormat extends InputFormat<Long, String> {
 	@Override
 	//numSplits - number of splits per file
 	public InputSplit[] getSplits(Job job, int numSplits) throws IOException {
+		System.out.println("FixedLengthInputFormat getting splits");
 		Path inputPath = job.getInputPath();
 		File folder = new File(inputPath.toUri());
 		File[] files = folder.listFiles();

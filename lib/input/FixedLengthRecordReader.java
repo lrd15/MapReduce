@@ -33,6 +33,7 @@ public class FixedLengthRecordReader extends RecordReader<Long, String> {
 	
 	public boolean nextKeyValue() throws IOException {
 		//check if all data are read
+		System.out.println("FixedLengthRecordReader: nextKeyValue");
 		if(ktotal <= counter) {
 			this.key = null;
 			this.value = null;
@@ -49,10 +50,12 @@ public class FixedLengthRecordReader extends RecordReader<Long, String> {
 	}
 	
 	public Long getCurrentKey() {
+		System.out.println("FixedLengthRecordReader: getCurrentKey");
 		return this.key;
 	}
 	
 	public String getCurrentValue() {
+		System.out.println("FixedLengthRecordReader: getCurrentValue");
 		return this.value;
 	}
 	
