@@ -32,18 +32,23 @@ public class ClientHandler extends Thread {
 		                Signal sig = (Signal)obj;
 		                switch (sig.getSignal()) {
 		                    case ADD_JOB:
+		                    	System.out.println("New job coming...");
 		                        toClient.writeObject(new Integer(id));
+		                        System.out.println("Assign job id: " + id);
 		                        break;
 		                    case ADD_JOB_COMPLETED:
+		                    	System.out.println("Splits sending completed.");
 		                        Object splitsObj = fromClient.readObject();
 		                        if (splitsObj instanceof InputSplit[]) {
 		                            InputSplit[] splits = (InputSplit[])splitsObj;
 		                            MapJob job = new MapJob(id, splits);
 		                            master.addMapJob(job);
 		                            running = false; // End this session
+		                            System.out.println("Input splits received. Client session ends.");
 		                        }
 		                        break;
 		                    default:
+		                    	System.out.println("Unexpected signal received: " + sig.getSignal());
 		                    	break;
 		                }
 		            }

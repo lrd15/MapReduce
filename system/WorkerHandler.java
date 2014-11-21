@@ -51,11 +51,12 @@ public class WorkerHandler extends Thread {
                     Signal sig = (Signal)obj;
                     switch (sig.getSignal()) {
                         case HEARTBEAT:
+                        	System.out.println("Received heartbeat.");
                             alive = true;
                             break;
                         case MAP_COMPLETED:
+                        	System.out.println("Received MAP_COMPLETED signal.");
                             // Code to get filenames
-
                             String[] filenames = null; // TODO
                             MapJob mapJob = master.getMapJob(jobID);
                             MapJobSplit split = mapJob.getSplit(idx);
@@ -67,6 +68,7 @@ public class WorkerHandler extends Thread {
                                 master.migrate(mapJob);
                             break;
                         case REDUCE_COMPLETED:
+                        	System.out.println("Received REDUCE_COMPLETED signal.");
                             ReduceJob reduceJob = master.getReduceJob(jobID);
                             ReducePartition partition = reduceJob.getPartition(idx);
                             partition.setJobState(JobState.COMPLETED);
@@ -76,6 +78,7 @@ public class WorkerHandler extends Thread {
                                 master.removeReduceJob(reduceJob);
                             break;
                         default:
+                        	System.out.println("Unexpected signal received: " + sig.getSignal());
                         	break;
                     }
                 }
@@ -95,7 +98,7 @@ public class WorkerHandler extends Thread {
 		}
         master.removeWorkerHandler(this);
     }
-
+    
     synchronized public Object readObject() throws ClassNotFoundException, IOException {
         return fromWorker.readObject();
     }

@@ -37,8 +37,6 @@ public class TaskTracker extends Thread {
 
         Host master = Configuration.MASTER;
         socket = new Socket(master.getIPAddress(), master.getPortForWorker());
-        fromHandler = new ObjectInputStream(socket.getInputStream());
-        toHandler = new ObjectOutputStream(socket.getOutputStream());
 
         ClientListener clientListener = new ClientListener();
         clientListener.start();
@@ -51,45 +49,59 @@ public class TaskTracker extends Thread {
         // Start a separate thread to periodically send heartbeat to job tracker
         HeartbeatThread heartbeatThread = new HeartbeatThread();
         heartbeatThread.start();
-
-        while (running) {
-			try {
+        
+        try {
+			fromHandler = new ObjectInputStream(socket.getInputStream());
+			toHandler = new ObjectOutputStream(socket.getOutputStream());
+			while (running) {
 				Object obj = fromHandler.readObject();
 				if (obj instanceof Signal) {
 	                Signal sig = (Signal)obj;
 	                switch (sig.getSignal()) {
 	                    case INIT_MAP:
+	                    	System.out.println("New map request coming...");
 	                        Object splitObj = fromHandler.readObject();
 	                        if (splitObj instanceof InputSplit) {
 	                            InputSplit inputSplit = (InputSplit)splitObj;
 	                            boolean success = doMap(inputSplit);
 	                            if (success) {
+	                            	System.out.println("Map operation completed.");
 	                                toHandler.writeObject(new Signal(SigNum.MAP_COMPLETED));
 	                                // Send object "String[conf.NUM_OF_REDUCERS] filenames" - abby
+	                            }
+	                            else {
+	                            	System.out.println("Map operation failed.");
 	                            }
 	                        }
 	                        break;
 	                    case INIT_REDUCE:
 	                        // Code here
-						Object partitionObj;
-							partitionObj = fromHandler.readObject();
+	                    	System.out.println("New reduce request coming...");
+	                    	Object partitionObj = fromHandler.readObject();
 							if (partitionObj instanceof ReducePartition) {
 	                            ReducePartition partition = (ReducePartition)partitionObj;
 	                            boolean success = doReduce(partition);
-	                            if (success)
+	                            if (success) {
+	                            	System.out.println("Reduce operation completed.");
 	                                toHandler.writeObject(new Signal(SigNum.REDUCE_COMPLETED));
+	                            }
+	                            else {
+	                            	System.out.println("Reduce operation failed.");
+	                            }
 	                        }
 	                        break;
 	                    default:
+	                    	System.out.println("Unexpected signal received: " + sig.getSignal());
 	                    	break;
 	                }
 				}
-			} catch (ClassNotFoundException | IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
 			}
-            
-        }
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
     }
 
     // Return true if successful
@@ -110,6 +122,7 @@ public class TaskTracker extends Thread {
         synchronized public void run() {
             while (running) {       
                 try {
+                	System.out.println("Sending heartbeat...");
                 	toHandler.writeObject(new Signal(SigNum.HEARTBEAT));
                     Thread.sleep(Configuration.TIMEOUT / 2);
                 } catch (InterruptedException e) {
