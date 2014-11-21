@@ -4,7 +4,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.InetAddress;
 
 import lib.input.InputSplit;
 import config.Configuration;
