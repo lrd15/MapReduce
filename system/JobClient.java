@@ -57,12 +57,18 @@ public class JobClient {
 		toMaster.writeObject(inputSplits);
 	}
 
-	private void sendFilesToWorkers() throws IOException {
+	private void sendFilesToWorkers() throws IOException  {
 		System.out.println("JobClient sending files to workers");
 		ArrayList<ObjectOutputStream> toWorkers = new ArrayList<ObjectOutputStream>();
 		ArrayList<ObjectInputStream> fromWorkers = new ArrayList<ObjectInputStream>();
 		for (Host worker : Configuration.WORKERS) {
-			Socket socket = new Socket(worker.getIPAddress(), worker.getPortForClient());
+			Socket socket = null;
+			try {
+				socket = new Socket(worker.getIPAddress(), worker.getPortForClient());
+			} catch (IOException e) {
+				System.err.print("Worker "+worker.getIPAddress().getHostAddress() + " is not connected.");
+				continue;
+			}
 			toWorkers.add(new ObjectOutputStream(socket.getOutputStream()));
 			fromWorkers.add(new ObjectInputStream(socket.getInputStream()));
 		}
@@ -100,10 +106,10 @@ public class JobClient {
 			int maxReadBufferSize = 8 * 1024; //8KB
 			//loop through splits
 			for (int destIx = 1; destIx <= numSplits; destIx++) {
-				System.out.println("Sending split: " + destIx);
+				System.out.println("Sending split " + destIx + " to worker " + ptr);
 				ObjectOutputStream oos = toWorkers.get(ptr);
 				oos.writeObject(new Signal(SigNum.SEND_SPLIT));
-				oos.writeObject(file.getName());
+				oos.writeObject(file.getName()+destIx);
 				if (bytesPerSplit > maxReadBufferSize) {
 					long numReads = bytesPerSplit / maxReadBufferSize;
 					long numRemainingRead = bytesPerSplit % maxReadBufferSize;
@@ -122,7 +128,7 @@ public class JobClient {
 			if (remainingBytes > 0) {
 				ObjectOutputStream oos = toWorkers.get(ptr);
 				oos.writeObject(new Signal(SigNum.SEND_SPLIT));
-				oos.writeObject(file.getName());
+				oos.writeObject(file.getName()+(numSplits+1));
 				readWrite(inputFile, oos, remainingBytes);
 				oos.writeObject(new Signal(SigNum.SEND_SPLIT_COMPLETED));
 				ptr = (ptr+1) % numOfWorker;
