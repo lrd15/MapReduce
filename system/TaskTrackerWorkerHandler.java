@@ -18,12 +18,17 @@ public class TaskTrackerWorkerHandler extends Thread {
         this.socket = socket;
         running = true;
         this.socket = socket;
-        fromWorker = new ObjectInputStream(socket.getInputStream());
-        toWorker = new ObjectOutputStream(socket.getOutputStream());
+        
     }
 
     @Override
     public void run() {
-        
+       	try {
+			fromWorker = new ObjectInputStream(socket.getInputStream());
+			toWorker = new ObjectOutputStream(socket.getOutputStream());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 }

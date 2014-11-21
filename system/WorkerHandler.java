@@ -36,8 +36,6 @@ public class WorkerHandler extends Thread {
         status = NONE;
         running = true;
         this.socket = socket;
-        fromWorker = new ObjectInputStream(socket.getInputStream());
-        toWorker = new ObjectOutputStream(socket.getOutputStream());
     }
 
     @Override
@@ -45,6 +43,8 @@ public class WorkerHandler extends Thread {
         try {
         	// Set timeout in ms
 			socket.setSoTimeout(Configuration.TIMEOUT);
+			fromWorker = new ObjectInputStream(socket.getInputStream());
+	        toWorker = new ObjectOutputStream(socket.getOutputStream());
 			while (running) {
                 Object obj = fromWorker.readObject();
                 if (obj instanceof Signal) {

@@ -24,11 +24,11 @@ public class TaskTracker extends Thread {
 
     private ServerSocket clientServerSocket, workerServerSocket;
 
-    public TaskTracker() throws Exception {
+    public TaskTracker(String ipAddress) throws Exception {
         nextClientID = 0;
         nextWorkerID = 0;
         running = true;
-        Host self = Configuration.getWorkerByAddress(InetAddress.getLocalHost().getHostAddress());
+        Host self = Configuration.getWorkerByAddress(ipAddress);
         if (self == null)
             throw new Exception("This host is not registered.");
 
@@ -160,7 +160,11 @@ public class TaskTracker extends Thread {
     
     public static void main(String[] args) {
     	try {
-    		TaskTracker taskTracker = new TaskTracker();
+    		if (args.length != 1) {
+    			System.out.println("Usage: TaskTracker <ip_address>");
+    			return;
+    		}
+    		TaskTracker taskTracker = new TaskTracker(args[0]);
     		taskTracker.start();
     	} catch (Exception e) {
     		e.printStackTrace();
