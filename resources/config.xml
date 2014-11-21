@@ -22,5 +22,5 @@
 	</worker>
 	<num-of-mappers>3</num-of-mappers>
 	<num-of-reducers>3</num-of-reducers>
-	<num-of-splits>3<num-of-splits>		
+	<num-of-splits>3</num-of-splits>
 </config>
