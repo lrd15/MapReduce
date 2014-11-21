@@ -30,8 +30,14 @@ public class ClientHandler extends Thread {
             if (obj instanceof Signal) {
                 Signal sig = (Signal)obj;
                 switch (sig.getSignal()) {
-                    case Signal.ADD_JOB:
+                    case ADD_JOB:
                         toClient.writeObject(new Integer(id));
+                        break;
+                    case ADD_JOB_COMPLETED:
+                        Object splitsObj = fromClient.readObject();
+                        if (splitsObj instanceof InputSplit[]) {
+                            
+                        }
                         break;
                 }
             }

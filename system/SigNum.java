@@ -6,5 +6,6 @@ public enum SigNum {
 	HEARTBEAT,
 	INIT_MAP,
 	INIT_REDUCE,
-	ADD_JOB
+	ADD_JOB,
+    ADD_JOB_COMPLETED
 }

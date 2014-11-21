@@ -57,13 +57,13 @@ public class TaskTracker extends Thread {
             if (obj instanceof Signal) {
                 Signal sig = (Signal)obj;
                 switch (sig.getSignal()) {
-                    case Signal.INIT_MAP:
+                    case INIT_MAP:
                         Object splitObj = fromHandler.readObject();
                         if (splitObj instanceof InputSplit) {
                             InputSplit inputSplit = (InputSplit)splitObj;
                             boolean success = doMap(inputSplit);
                             if (success) {
-                                toHandler.writeObject(new Signal(Signal.MAP_COMPLETED));
+                                toHandler.writeObject(new Signal(SigNum.MAP_COMPLETED));
                                 // Send object "String[conf.NUM_OF_REDUCERS] filenames" - abby
                             }
                         }
@@ -71,14 +71,14 @@ public class TaskTracker extends Thread {
                             // error
                         }
                         break;
-                    case Signal.INIT_REDUCE:
+                    case INIT_REDUCE:
                         // Code here
                         Object partitionObj = fromHandler.readObject();
                         if (partitionObj instanceof ReducePartition) {
                             ReducePartition partition = (ReducePartition)partitionObj;
                             boolean success = doReduce(partition);
                             if (success) {
-                                toHandler.writeObject(new Signal(Signal.REDUCE_COMPLETED));
+                                toHandler.writeObject(new Signal(REDUCE_COMPLETED));
                                 // No other information to send
                             }
                         }
@@ -104,7 +104,7 @@ public class TaskTracker extends Thread {
         @Override
         synchronized public void run() {
             while (running) {
-                toHandler.writeObject(new Signal(Signal.HEARTBEAT));
+                toHandler.writeObject(new Signal(SigNum.HEARTBEAT));
                 try {
                     Thread.sleep(conf.TIMEOUT / 2);
                 } catch (InterruptedException e) {

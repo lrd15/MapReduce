@@ -59,7 +59,10 @@ public class WorkerHandler extends Thread {
                             split.setIntermediateFilenames(filenames);
                             break;
                         case REDUCE_COMPLETED:
-                            ReducePartition partition = master.get
+                            ReducePartition partition =
+                                master.getReducePartition(jobID, idx);
+                            partition.setJobState(JobState.COMPLETED);
+                            setWorkerState(WorkerState.IDLE);
                             break;
                     }
                 }
