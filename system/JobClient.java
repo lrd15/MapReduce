@@ -90,7 +90,8 @@ public class JobClient {
 		
 		//loop through files
 		for(File file : files) {
-			String filename = file.getName();
+			System.out.println("Sending file: " + file.getName());
+			String filename = this.job.getInputPath() + File.separator + file.getName();
 			RandomAccessFile inputFile = new RandomAccessFile(filename, "r");
 			long numSplits = Configuration.NUM_OF_SPLITS;
 			long sourceSize = inputFile.length();
@@ -99,6 +100,7 @@ public class JobClient {
 			int maxReadBufferSize = 8 * 1024; //8KB
 			//loop through splits
 			for (int destIx = 1; destIx <= numSplits; destIx++) {
+				System.out.println("Sending split: " + destIx);
 				ObjectOutputStream oos = toWorkers.get(ptr);
 				oos.writeObject(new Signal(SigNum.SEND_FILE));
 				oos.writeObject(file.getName());
