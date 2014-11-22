@@ -8,8 +8,6 @@ import java.io.RandomAccessFile;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
-
 import lib.input.InputFormat;
 import lib.input.InputSplit;
 import config.Configuration;
@@ -38,7 +36,7 @@ public class JobClient {
 		getJobIDFromMaster();
 		sendFilesToWorkers();
 		acknowledgeMaster();
-		//send job object
+		sendJobContextToMaster();
 		sendInputSplitsToMaster();
 	}
 	
@@ -87,6 +85,12 @@ public class JobClient {
 		}
 	}
 
+	private void sendJobContextToMaster() throws IOException {
+		System.out.println("JobClient acknowledging master");
+		toMaster.writeObject(new Signal(SigNum.SEND_JOB_CONTEXT));
+		toMaster.writeObject(this.job); //JobContext
+	}
+	
 	private void acknowledgeMaster() throws IOException {
 		System.out.println("JobClient acknowledging master");
 		toMaster.writeObject(new Signal(SigNum.ADD_JOB_COMPLETED));
