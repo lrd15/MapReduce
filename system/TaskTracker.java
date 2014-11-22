@@ -356,10 +356,10 @@ public class TaskTracker extends Thread {
 							getThis(), nextWorkerID++, socket);
 					workerHandlerList.add(workerHandler);
 					workerHandler.start();
-					System.out.println("New worker connected: "
+					System.out.println("New worker (reducer) connected: "
 							+ socket.getRemoteSocketAddress());
 				} catch (IOException e) {
-					System.err.println("Failed to connect worker: "
+					System.err.println("Failed to connect worker (reducer): "
 							+ socket.getRemoteSocketAddress());
 					e.printStackTrace();
 				}

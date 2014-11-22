@@ -347,10 +347,10 @@ public class JobTracker extends Thread {
     }
 
     private WorkerHandler getWorkerHandlerByHost(Host host) {
-    	System.out.println("Trying to get worker handler by host...");
-    	System.out.println("Host ip: " + host.getIPAddress().getHostAddress());
+//    	System.out.println("Trying to get worker handler by host...");
+//    	System.out.println("Host ip: " + host.getIPAddress().getHostAddress());
         for (WorkerHandler wh : workerHandlerList) {
-        	System.out.println("WorkerHandler ip: " + wh.getSocket().getInetAddress().getHostAddress());
+//        	System.out.println("WorkerHandler ip: " + wh.getSocket().getInetAddress().getHostAddress());
             if (wh.getSocket().getInetAddress().getHostAddress().equals(host.getIPAddress().getHostAddress()))
                 return wh;
         }
