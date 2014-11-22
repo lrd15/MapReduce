@@ -362,12 +362,26 @@ public class JobTracker extends Thread {
     
     synchronized public void killWorkerHandler(WorkerHandler wh) {
     	// If wh is doing MAP_JOB
-    	
+    	if (wh.getJobStatus() == WorkerHandler.MAP_JOB) {
+    		int jobID = wh.getJobID();
+    		int splitID = wh.getIdx();
+    		for (MapJob job : mapJobList)
+    			if (job.getID() == jobID)
+    				job.getSplit(splitID).setJobState(JobState.IDLE);
+    	}
     	// If wh is doing REDUCE_JOB
+    	if (wh.getJobStatus() == WorkerHandler.REDUCE_JOB) {
+    		int jobID = wh.getJobID();
+    		int partitionIdx = wh.getIdx();
+    		for (ReduceJob job : reduceJobList)
+    			if (job.getID() == jobID)
+    				job.getPartition(partitionIdx).setJobState(JobState.IDLE);
+    	}
     	
     	// If wh has completed some map job splits
     	// -> redo because intermediate files are
     	// no longer accessible
+    	
     }
 
     // Check whether workers are alive
