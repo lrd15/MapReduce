@@ -77,7 +77,12 @@ public class JobClient {
 		File[] files = folder.listFiles();
 		splitAndSend(files, toWorkers, fromWorkers);
 		
-		//TODO
+		try {
+			Thread.sleep(20000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		for(int i=0; i < toWorkers.size(); i++) {
 			//TODO toWorkers.get(i).writeObject(new Signal(SigNum.SEND_FILE_COMPLETED));
@@ -112,7 +117,6 @@ public class JobClient {
 				ObjectOutputStream oos = toWorkers.get(ptr);
 				oos.writeObject(new Signal(SigNum.SEND_SPLIT));
 				oos.writeObject(file.getName()+destIx);
-				
 				long n = bytesPerSplit;
 				while (n > 0) {
 					long bytesToWrite = Math.min(n, maxReadBufferSize);
@@ -121,8 +125,6 @@ public class JobClient {
 						break;
 					n -= bytesWritten;
 				}
-				
-//				while(readWrite(inputFile, oos, maxReadBufferSize)); //keep sending 
 				ptr = (ptr+1) % numOfWorker; //TODO
 			}
 			if (remainingBytes > 0) {
@@ -140,10 +142,10 @@ public class JobClient {
 
 	private int readWrite(RandomAccessFile raf, ObjectOutputStream oos, long numBytes) throws IOException {
 		byte[] buf = new byte[(int) numBytes];
-		int bytesRead = raf.read(buf);
-		oos.writeObject(new Integer(bytesRead));
-		if (bytesRead != -1)
+		int bytesWritten = raf.read(buf);
+		oos.writeObject(new Integer(bytesWritten));
+		if (bytesWritten != -1)
 			oos.writeObject(buf);
-		return bytesRead;
+		return bytesWritten;
 	}
 }
