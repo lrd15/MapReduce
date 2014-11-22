@@ -35,8 +35,8 @@ public class JobClient {
 		this.job = job;
 		getJobIDFromMaster();
 		sendFilesToWorkers();
-		acknowledgeMaster();
 		sendJobContextToMaster();
+		acknowledgeMaster();
 		sendInputSplitsToMaster();
 	}
 	
