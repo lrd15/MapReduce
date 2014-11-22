@@ -167,6 +167,12 @@ public class TaskTracker extends Thread {
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 			return false;
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+			return false;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
 		}
 		return true;
 	}
