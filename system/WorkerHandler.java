@@ -58,10 +58,15 @@ public class WorkerHandler extends Thread {
                         case MAP_COMPLETED:
                         	System.out.println("Received MAP_COMPLETED signal.");
                             String[] filenames = (String[])fromWorker.readObject();
+                            System.out.println("Received " + filenames.length + " intermediate files.");
                             MapJob mapJob = master.getMapJob(jobID);
                             MapJobSplit split = mapJob.getSplit(idx);
                             split.setJobState(JobState.COMPLETED);
                             setWorkerState(WorkerState.IDLE);
+                            if (isIdle())
+                            	System.out.println("Worker (" + getSocket().getInetAddress() + ") now idle.");
+                            else
+                            	System.out.println("Worker (" + getSocket().getInetAddress() + ") failed to become idle.");
                             split.setIntermediateFilenames(filenames);
                             mapJob.incNumCompleted();
                             if (mapJob.isCompleted())

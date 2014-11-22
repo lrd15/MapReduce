@@ -3,6 +3,7 @@ package system;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -28,8 +29,9 @@ public class JobTracker extends Thread {
 
     private ServerSocket clientServerSocket, workerServerSocket;
     
-    public static final String INPUT_DIR = "input";
-    public static final String OUTPUT_DIR = "output";
+    public static final String MAPIN_DIR = "mapin";
+    public static final String MAPOUT_DIR = "mapout";
+    public static final String REDUCEIN_DIR = "reducein";
 
     public JobTracker() {
         nextClientID = 0;
@@ -73,6 +75,18 @@ public class JobTracker extends Thread {
 //        		System.out.println("# of MapJob = " + mapJobList.size());
 //        	if (reduceJobList.size() > 0)
 //        		System.out.println("# of ReduceJob = " + reduceJobList.size());
+//        	boolean allBusy = true;
+//        	boolean hasHandler = false;
+//        	for (WorkerHandler wh : workerHandlerList) {
+//        		hasHandler = true;
+//        		if (wh.isIdle()) {
+//        			allBusy = false;
+//        			System.out.println("Worker (" + wh.getSocket().getInetAddress() + ") is idle...");
+//        			break;
+//        		}
+//        	}
+//        	if (hasHandler && allBusy)
+//        		System.out.println("All workers busy...");
             if (hasJob()) {
 //            	System.out.println("Has job...");
                 boolean done = false;
@@ -90,7 +104,7 @@ public class JobTracker extends Thread {
 								Host[] hosts = split.getInputSplit().getLocations();
 								for (Host host : hosts) {
 									System.out.println("Trying host (" + host.getIPAddress().getHostAddress() + ")...");
-                                    WorkerHandler wh = getWorkerHandler(host);
+                                    WorkerHandler wh = getWorkerHandlerByHost(host);
                                     System.out.println("WorkerHandler (" + wh.getSocket().getInetAddress() + ") is " + wh.getWorkerState());
                                     if (wh != null && wh.isIdle()) { // Found idle worker
                                     	System.out.println("Initiating map operation...");
@@ -322,7 +336,7 @@ public class JobTracker extends Thread {
         shouldDoMap ^= true;
     }
 
-    private WorkerHandler getWorkerHandler(Host host) {
+    private WorkerHandler getWorkerHandlerByHost(Host host) {
     	System.out.println("Trying to get worker handler by host...");
     	System.out.println("Host ip: " + host.getIPAddress().getHostAddress());
         for (WorkerHandler wh : workerHandlerList) {
@@ -331,6 +345,15 @@ public class JobTracker extends Thread {
                 return wh;
         }
         return null;
+    }
+    
+    public Host getWorkerHostByWorkerID(int workerID) {
+    	for (WorkerHandler wh : workerHandlerList)
+    		if (wh.getID() == workerID)
+    			for (Host host : Configuration.WORKERS)
+    				if (host.getIPAddress().getHostAddress().equals(wh.getSocket().getInetAddress().getHostAddress()))
+    					return host;
+    	return null;
     }
 
     private JobTracker getThis() {

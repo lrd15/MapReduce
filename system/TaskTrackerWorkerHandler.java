@@ -31,6 +31,35 @@ public class TaskTrackerWorkerHandler extends Thread {
 				if (obj instanceof Signal) {
                     Signal sig = (Signal)obj;
                     switch (sig.getSignal()) {
+		                case RETRIEVE_FILE:
+		                	Object filenameObj = fromWorker.readObject();
+		                	if (filenameObj instanceof String) {
+		                		String filename = (String)filenameObj;
+		                		try {
+		                			FileInputStream fis = new FileInputStream(new File(JobTracker.MAPOUT_DIR + File.separator + filename));
+		                			toWorker.writeObject(new Signal(SigNum.SEND_SPLIT));
+		                			byte[] buffer = new byte[8 * 1024]; // 8KB
+		                			int bytesRead;
+		                			while ((bytesRead = fis.read(buffer)) != -1) {
+		                				if (bytesRead > 0) {
+		                					toWorker.writeObject(new Integer(bytesRead));
+		                					toWorker.writeObject(buffer);
+		                				}
+		                			}
+		                			toWorker.writeObject(new Signal(SigNum.SEND_SPLIT_COMPLETED));
+		                		} catch (FileNotFoundException e) {
+		                			e.printStackTrace();
+		                			toWorker.writeObject(new Signal(SigNum.FILE_NOT_FOUND));
+		                		} catch (Exception e) {
+		                			e.printStackTrace();
+		                			toWorker.writeObject(new Signal(SigNum.UNKNOWN));
+		                		}
+		                	}
+		                	else {
+		                		System.out.println("Unexpected object received.");
+		                		toWorker.writeObject(new Signal(SigNum.UNKNOWN));
+		                	}
+		                	break;
 						default:
 							System.out.println("Unexpected signal received: " + sig.getSignal());
 							break;
