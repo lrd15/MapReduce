@@ -1,28 +1,24 @@
 package lib.input;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import system.Host;
-import config.Configuration;
 
 
 public class FileInputSplit extends InputSplit {
 	
 	private static final long serialVersionUID = 1L;
 
-	private static int hostItr = 0;
-	
 	private String filename;
 	private long start;
 	private long length;
-	private ArrayList<Host> hosts;
+	private Host[] hosts;
 	
-	public FileInputSplit(String filename, long start, long length){
+	public FileInputSplit(String filename, long start, long length, Host[] hosts){
 		this.filename = filename;
 		this.start = start;
 		this.length = length;
-		this.hosts = Configuration.WORKERS;
+		this.hosts = hosts;
 	}
 	
 	public String getFilename() throws IOException {
@@ -39,9 +35,7 @@ public class FileInputSplit extends InputSplit {
 
 	@Override
 	public Host[] getLocations() throws IOException {
-		Host[] host = new Host[]{hosts.get(hostItr)};
-		hostItr = (hostItr+1) % hosts.size();
-		return host;
+		return this.hosts;
 	}
 	
 }

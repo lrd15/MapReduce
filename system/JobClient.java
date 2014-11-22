@@ -19,9 +19,11 @@ public class JobClient {
 	private ArrayList<InputSplit> inputSplits;
 	private ObjectOutputStream toMaster;
 	private ObjectInputStream fromMaster;
+	private ArrayList<Host> workerHosts;
 
 	public JobClient() {
 		this.inputSplits = new ArrayList<InputSplit>();
+		this.workerHosts = Configuration.WORKERS;
 		Host master = Configuration.MASTER;
 		try {
 			Socket socket = new Socket(master.getIPAddress(), master.getPortForClient());
@@ -49,7 +51,8 @@ public class JobClient {
 	}
 
 	private void sendInputSplitsToMaster() throws InstantiationException, IllegalAccessException, IOException {
-		toMaster.writeObject(this.inputSplits.toArray());
+		InputSplit[] splits = new InputSplit[this.inputSplits.size()];
+		toMaster.writeObject(this.inputSplits.toArray(splits));
 	}
 
 	private void sendFilesToWorkers() throws IOException, ClassNotFoundException  {
@@ -133,7 +136,8 @@ public class JobClient {
  				} else {
  					System.err.println("wrong object");
  				}
- 				InputSplit thisSplit = new FileInputSplit(splitFilename, 0, bytesPerSplit);
+ 				Host[] hosts = new Host[]{this.workerHosts.get(ptr)};
+ 				InputSplit thisSplit = new FileInputSplit(splitFilename, 0, bytesPerSplit, hosts);
  				this.inputSplits.add(thisSplit);
 				ptr = (ptr+1) % numOfWorker; 
  			}
@@ -154,7 +158,8 @@ public class JobClient {
  				} else {
  					System.err.println("wrong object");
  				}
- 				InputSplit thisSplit = new FileInputSplit(splitFilename, 0, remainingBytes);
+ 				Host[] hosts = new Host[]{this.workerHosts.get(ptr)};
+ 				InputSplit thisSplit = new FileInputSplit(splitFilename, 0, remainingBytes, hosts);
  				this.inputSplits.add(thisSplit);
 				ptr = (ptr+1) % numOfWorker;
  			}
