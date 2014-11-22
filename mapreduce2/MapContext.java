@@ -5,12 +5,11 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
+import lib.input.RecordReader;
+import lib.output.FileRecordWriter;
+import lib.output.RecordWriter;
 import config.Configuration;
 import config.JobContext;
-
-import lib.input.InputSplit;
-import lib.input.RecordReader;
-import lib.output.*;
 
 public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
@@ -18,18 +17,14 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 	private TreeMap<KEYOUT, VALUEOUT> output;
 	private RecordReader<KEYIN, VALUEIN> reader;
 	private Partitioner<KEYOUT, VALUEOUT> partitioner;
-//	private InputSplit inputSplit;
 	
 	private static int id = 0;
 
     public MapContext(JobContext jobContext,
     				  RecordReader<KEYIN,VALUEIN> reader, 
-    				  //RecordWriter<KEYOUT,VALUEOUT> writer, 
-    				  //InputSplit inputSplit, 
     				  Partitioner<KEYOUT, VALUEOUT> partitioner) {
     	this.jobContext = jobContext;
     	this.reader = reader;
-//    	this.inputSplit = inputSplit;
     	this.partitioner = partitioner;
     	this.output = new TreeMap<KEYOUT, VALUEOUT>();
     	id++;
@@ -46,10 +41,6 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
     public boolean nextKeyValue() throws IOException {
     	return this.reader.nextKeyValue();
     }
-    
-//    public InputSplit getInputSplit() {
-//    	return this.inputSplit;
-//    }
     
     public void write(KEYOUT key, VALUEOUT value) throws IOException {
     	this.output.put(key, value);

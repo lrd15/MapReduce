@@ -133,7 +133,22 @@ public class TaskTracker extends Thread {
 
     // Return true if successful
     private boolean doReduce(Job job, ReducePartition partition) {
-        // TODO by abby
+//    	int[] mapperIDs = partition.getMapperIDs();
+//        String[] filenames = partition.getFilenames();
+//        OutputFormat outputFormat = (OutputFormat)job.getOutputFormatClass().newInstance();
+//        
+//        ArrayList<LineRecordReader> readers = new ArrayList<LineRecordReader>();
+//        for(int i=0; i<mapperIDs.size(); i++) {
+//            //read from mappers
+//            LineRecordReader reader = new LineRecordReader(filenames[i]); 
+//            readers.add(reader); 
+//        }
+//        
+//        StringStringIterator itr = new StringStringIterator(readers);
+//        RecordWriter writer = outputFormat.getRecordWriter(job);
+//        ReduceContext reduceContext = new ReduceContext<String, String, String, String>(job, itr, writer);
+//        Reducer reducer = (Reducer)job.getReducerClass().newInstance();
+//        reducer.run(reduceContext);
     	return true;
     }
 

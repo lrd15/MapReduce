@@ -2,7 +2,6 @@ package config;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 
 import system.JobClient;
 
@@ -26,8 +25,6 @@ public class Job implements JobContext {
 	private File inputPath;
 	private File outputPath;
 	
-	//private int numOfReduceJobs;
-	//private int numOfMapJobs;
 	private int recordSize;
 	
 	private Job(String identifier) { 

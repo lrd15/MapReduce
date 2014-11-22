@@ -9,6 +9,7 @@ public interface JobContext extends Serializable {
 	public Class<?> getPartitionerClass();
 	
 	public String getJobIdentifier();
+	public int getID();
 	
 	public Class<?> getInputFormatClass();
 	public Class<?> getOutputFormatClass();
