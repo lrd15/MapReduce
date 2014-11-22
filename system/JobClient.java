@@ -41,14 +41,12 @@ public class JobClient {
 	}
 	
 	private void getJobIDFromMaster() throws IOException, ClassNotFoundException {
-		System.out.println("JobClient getting ID from master");
 		toMaster.writeObject(new Signal(SigNum.ADD_JOB));
 		int jobID = (Integer) fromMaster.readObject();
 		this.job.setID(jobID);
 	}
 
 	private void sendInputSplitsToMaster() throws InstantiationException, IllegalAccessException, IOException {
-		System.out.println("JobClient sending input splits to master");
 		int numSplits = Configuration.NUM_OF_SPLITS;
 		InputFormat inputFormat = null;
 		InputSplit[] inputSplits = null;
@@ -58,7 +56,6 @@ public class JobClient {
 	}
 
 	private void sendFilesToWorkers() throws IOException, ClassNotFoundException  {
-		System.out.println("JobClient sending files to workers");
 		ArrayList<ObjectOutputStream> toWorkers = new ArrayList<ObjectOutputStream>();
 		ArrayList<ObjectInputStream> fromWorkers = new ArrayList<ObjectInputStream>();
 		for (Host worker : Configuration.WORKERS) {
@@ -86,13 +83,11 @@ public class JobClient {
 	}
 
 	private void sendJobContextToMaster() throws IOException {
-		System.out.println("JobClient acknowledging master");
 		toMaster.writeObject(new Signal(SigNum.SEND_JOB_CONTEXT));
 		toMaster.writeObject(this.job); //JobContext
 	}
 	
 	private void acknowledgeMaster() throws IOException {
-		System.out.println("JobClient acknowledging master");
 		toMaster.writeObject(new Signal(SigNum.ADD_JOB_COMPLETED));
 	}
 
@@ -113,7 +108,6 @@ public class JobClient {
 			long remainingBytes = sourceSize % numSplits;
 			//loop through splits
 			for (int destIx = 0; destIx <= numSplits-1; destIx++) {
- 				System.out.println("Sending split: " + destIx);
  				ObjectOutputStream oos = toWorkers.get(ptr);
  				ObjectInputStream ois = fromWorkers.get(ptr);
 				oos.writeObject(new Signal(SigNum.SEND_SPLIT));
