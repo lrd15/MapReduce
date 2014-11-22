@@ -70,10 +70,13 @@ public class JobTracker extends Thread {
                             MapJobSplit split = splits[i];
                             if (split.getJobState() != JobState.IDLE)
                                 continue;
+                            System.out.println("Found idle map job split: JobID = " + job.getID() + ", SplitId = " + i);
 							try {
 								Host[] hosts = split.getInputSplit().getLocations();
 								for (Host host : hosts) {
+									System.out.println("Trying host (" + host.getIPAddress().getHostAddress() + ")...");
                                     WorkerHandler wh = getWorkerHandler(host);
+                                    System.out.println("WorkerHandler (" + wh.getSocket().getLocalAddress() + ") is " + wh.getWorkerState());
                                     if (wh != null && wh.isIdle()) { // Found idle worker
                                     	System.out.println("Initiating map operation...");
                                         done = initMap(wh, split, job.getID(), i);
@@ -302,7 +305,7 @@ public class JobTracker extends Thread {
 
     private WorkerHandler getWorkerHandler(Host host) {
         for (WorkerHandler wh : workerHandlerList)
-            if (wh.getSocket().getLocalAddress().equals(host.getIPAddress()))
+            if (wh.getSocket().getLocalAddress().getHostAddress().equals(host.getIPAddress().getHostAddress()))
                 return wh;
         return null;
     }

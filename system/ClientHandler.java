@@ -49,7 +49,7 @@ public class ClientHandler extends Thread {
 	                            MapJob mapJob = new MapJob(id, splits);
 	                            master.addMapJob(mapJob);
 	                            running = false; // End this session
-	                            System.out.println("Input splits received. Client session ended.");
+	                            System.out.println(splits.length + " input splits received. Client session ended.");
 		                        break;
 		                    default:
 		                    	System.out.println("Unexpected signal received: " + sig.getSignal());
