@@ -153,7 +153,6 @@ public class TaskTracker extends Thread {
 		if (!getFiles(mapperAddresses, filenames))
 	        return false;
 
-		// TODO
 		try {
 			OutputFormat outputFormat = (OutputFormat) job.getOutputFormatClass().newInstance();
 			ArrayList<LineRecordReader> readers = new ArrayList<LineRecordReader>();
