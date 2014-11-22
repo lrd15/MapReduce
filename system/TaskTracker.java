@@ -273,12 +273,12 @@ public class TaskTracker extends Thread {
 	                    }
 	                }
 	                socket.close();
-	                cur = (cur + 1) % n;
 	            } catch (Exception e) {
 	                e.printStackTrace();
 	                // Worker failure
 	            }
 	        }
+	        cur = (cur + 1) % n;
 	    }
 	    return true;
 	}

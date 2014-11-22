@@ -42,10 +42,10 @@ public class TaskTrackerWorkerHandler extends Thread {
 		                			byte[] buffer = new byte[8 * 1024]; // 8KB
 		                			int bytesRead;
 		                			while ((bytesRead = fis.read(buffer)) != -1) {
-		                				if (bytesRead > 0) {
+//		                				if (bytesRead > 0) {
 		                					toWorker.writeObject(new Integer(bytesRead));
 		                					toWorker.writeObject(buffer);
-		                				}
+//		                				}
 		                			}
 		                			fis.close();
 		                			toWorker.writeObject(new Signal(SigNum.SEND_SPLIT_COMPLETED));
