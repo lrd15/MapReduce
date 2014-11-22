@@ -10,7 +10,6 @@ import lib.input.RecordReader;
 import lib.output.FileRecordWriter;
 import lib.output.RecordWriter;
 import config.Configuration;
-import config.JobContext;
 
 public class MapContext<KEYIN, VALUEIN, KEYOUT extends Comparable<KEYOUT>, VALUEOUT> {
 
@@ -22,8 +21,7 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT extends Comparable<KEYOUT>, VALUE
 	
 	private String instanceID;
 	
-    public MapContext(JobContext jobContext,
-    				  String instanceID,
+    public MapContext(String instanceID,
     				  RecordReader<KEYIN,VALUEIN> reader, 
     				  Partitioner<KEYOUT, VALUEOUT> partitioner) {
     	this.reader = reader;
