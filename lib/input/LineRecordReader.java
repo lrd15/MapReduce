@@ -50,7 +50,6 @@ public class LineRecordReader extends RecordReader<String, String> {
 			return false;
 		}
 		
-		System.out.println(line);
 		StringTokenizer tokenizer = new StringTokenizer(line);
 		this.key = tokenizer.nextToken();
 		this.value = tokenizer.nextToken();
