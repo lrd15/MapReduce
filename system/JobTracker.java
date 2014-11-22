@@ -204,6 +204,12 @@ public class JobTracker extends Thread {
     	reduceJobList.remove(job);
     	System.out.println("ReduceJob #" + job.getID() + " removed.");
     }
+    
+    synchronized public void removeReduceJob(int jobID) {
+    	for (int i = 0; i < reduceJobList.size(); i++)
+    		if (reduceJobList.get(i).getID() == jobID)
+    			reduceJobList.remove(i--);
+    }
 
     public ReduceJob getReduceJob(int jobID) {
         for (ReduceJob job : reduceJobList)
@@ -292,9 +298,16 @@ public class JobTracker extends Thread {
                 filenameList.toArray(new String[filenameList.size()]));
         }
         ReduceJob reduceJob = new ReduceJob(mapJob.getID(), partitions);
-        removeMapJob(mapJob);
         addReduceJob(reduceJob);
         System.out.println("Map job #" + mapJob.getID() + " migrated to reduce job list.");
+    }
+    
+    synchronized public void fallback(int jobID) {
+    	for (MapJob job : mapJobList)
+    		if (job.getID() == jobID)
+    			for (MapJobSplit split : job.getSplits())
+    				split.setJobState(JobState.IDLE);
+    	removeReduceJob(jobID);
     }
     
     private InetAddress getWorkerAddressByID(int workerID) {
@@ -363,28 +376,18 @@ public class JobTracker extends Thread {
     }
     
     synchronized public void killWorkerHandler(WorkerHandler wh) {
-    	// If wh is doing MAP_JOB
-    	if (wh.getJobStatus() == WorkerHandler.MAP_JOB) {
-    		int jobID = wh.getJobID();
-    		int splitID = wh.getIdx();
-    		for (MapJob job : mapJobList)
-    			if (job.getID() == jobID)
-    				job.getSplit(splitID).setJobState(JobState.IDLE);
-    	}
-    	// If wh is doing REDUCE_JOB
-    	if (wh.getJobStatus() == WorkerHandler.REDUCE_JOB) {
-    		int jobID = wh.getJobID();
-    		int partitionIdx = wh.getIdx();
-    		for (ReduceJob job : reduceJobList)
-    			if (job.getID() == jobID)
-    				job.getPartition(partitionIdx).setJobState(JobState.IDLE);
-    	}
-    	
     	// If wh has completed some map job splits
     	// -> redo because intermediate files are
     	// no longer accessible
+    	for (MapJob job : mapJobList)
+    		for (MapJobSplit split : job.getSplits())
+    			if (split.getWorkerID() == wh.getID())
+    				split.setJobState(JobState.IDLE);
     	
-    	
+    	for (ReduceJob job : reduceJobList)
+    		for (ReducePartition partition : job.getPartitions())
+    			if (partition.getWorkerID() == wh.getID() && partition.getJobState() == JobState.IN_PROGRESS)
+    				partition.setJobState(JobState.IDLE);
     }
 
     // Check whether workers are alive
