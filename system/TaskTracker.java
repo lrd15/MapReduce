@@ -5,9 +5,10 @@ import java.util.ArrayList;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import lib.input.InputSplit;
-import config.Configuration;
-import config.Job;
+import lib.input.*;
+import lib.output.*;
+import mapreduce2.*;
+import config.*;
 
 public class TaskTracker extends Thread {
     private ArrayList<TaskTrackerWorkerHandler> workerHandlerList;
@@ -111,12 +112,21 @@ public class TaskTracker extends Thread {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
 		}
     }
 
     // Return true if successful
-    private boolean doMap(Job job, InputSplit inputSplit, String[] filenames) {
-        // TODO by abby
+    private boolean doMap(Job job, InputSplit inputSplit, String[] filenames) throws InstantiationException, IllegalAccessException, IOException {
+    	InputFormat inputFormat = (InputFormat)job.getInputFormatClass().newInstance();
+        Partitioner partitioner = (Partitioner)job.getPartitionerClass().newInstance();
+        RecordReader<Long, String> reader = inputFormat.getRecordReader(job, JobTracker.INPUT_DIR, inputSplit);
+        MapContext mapContext = new MapContext<Long, String, String, String>(job, reader, partitioner);
+        Mapper mapper = (Mapper)job.getMapperClass().newInstance();
+        mapper.run(mapContext); 
     	return true;
     }
 
