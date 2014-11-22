@@ -97,8 +97,7 @@ public class TaskTracker extends Thread {
 						System.out.println("New map request coming...");
 						int splitIdx = (Integer)fromHandler.readObject();
 						job = (Job) fromHandler.readObject();
-						InputSplit inputSplit = (InputSplit) fromHandler
-								.readObject();
+						InputSplit inputSplit = (InputSplit) fromHandler.readObject();
 						String[] filenames = new String[Configuration.NUM_OF_REDUCERS];
 						success = doMap(job, splitIdx, inputSplit, filenames);
 						if (success) {
@@ -108,14 +107,14 @@ public class TaskTracker extends Thread {
 							toHandler.writeObject(filenames);
 						} else {
 							System.out.println("Map operation failed.");
+							toHandler.writeObject(new Signal(SigNum.MAP_FAILED));
 						}
 						break;
 					case INIT_REDUCE:
 						System.out.println("New reduce request coming...");
 						int partitionIdx = (Integer)fromHandler.readObject();
 						job = (Job) fromHandler.readObject();
-						ReducePartition partition = (ReducePartition) fromHandler
-								.readObject();
+						ReducePartition partition = (ReducePartition) fromHandler.readObject();
 						success = doReduce(job, partitionIdx, partition);
 						if (success) {
 							System.out.println("Reduce operation completed.");
@@ -123,6 +122,7 @@ public class TaskTracker extends Thread {
 									SigNum.REDUCE_COMPLETED));
 						} else {
 							System.out.println("Reduce operation failed.");
+							toHandler.writeObject(new Signal(SigNum.REDUCE_FAILED));
 						}
 						break;
 					default:
