@@ -112,10 +112,11 @@ public class TaskTracker extends Thread {
 						break;
 					case INIT_REDUCE:
 						System.out.println("New reduce request coming...");
+						int partitionIdx = (Integer)fromHandler.readObject();
 						job = (Job) fromHandler.readObject();
 						ReducePartition partition = (ReducePartition) fromHandler
 								.readObject();
-						success = doReduce(job, partition);
+						success = doReduce(job, partitionIdx, partition);
 						if (success) {
 							System.out.println("Reduce operation completed.");
 							toHandler.writeObject(new Signal(
@@ -166,7 +167,7 @@ public class TaskTracker extends Thread {
 	}
 
 	// Return true if successful
-	private boolean doReduce(Job job, ReducePartition partition) {
+	private boolean doReduce(Job job, int partitionIdx, ReducePartition partition) {
 		InetAddress[] mapperAddresses = partition.getMapperAddresses();
 		String[] filenames = partition.getFilenames();
 		
@@ -182,7 +183,9 @@ public class TaskTracker extends Thread {
 			}
 	
 			StringStringIterator itr = new StringStringIterator(readers);
-			RecordWriter writer = outputFormat.getRecordWriter(job);
+			String identifier = job.getJobIdentifier() + job.getID() + "_" + partitionIdx;
+			RecordWriter writer = outputFormat.getRecordWriter(job, identifier);
+			
 			ReduceContext reduceContext = new ReduceContext<String, String, String, String>(itr, writer);
 			Reducer reducer = (Reducer) job.getReducerClass().newInstance();
 			reducer.run(reduceContext);

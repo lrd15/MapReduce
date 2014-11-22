@@ -256,6 +256,7 @@ public class JobTracker extends Thread {
             int jobID, int partitionIdx) {
         try {
         	wh.writeObject(new Signal(SigNum.INIT_REDUCE));
+        	wh.writeObject(new Integer(partitionIdx));
         	wh.writeObject(getJob(jobID));
 			wh.writeObject(partition);
 		} catch (IOException e) {
@@ -270,7 +271,7 @@ public class JobTracker extends Thread {
     }
 
     synchronized public void migrate(MapJob mapJob) {
-    	System.out.println("Migrating map job " + mapJob.getID() + " to reduce job list...");
+    	System.out.println("Migrating map job #" + mapJob.getID() + " to reduce job list...");
         MapJobSplit[] splits = mapJob.getSplits();
         if (splits.length == 0)
             return;
@@ -293,7 +294,7 @@ public class JobTracker extends Thread {
         ReduceJob reduceJob = new ReduceJob(mapJob.getID(), partitions);
         removeMapJob(mapJob);
         addReduceJob(reduceJob);
-        System.out.println("Map job " + mapJob.getID() + "migrated to reduce job list.");
+        System.out.println("Map job #" + mapJob.getID() + " migrated to reduce job list.");
     }
     
     private InetAddress getWorkerAddressByID(int workerID) {
