@@ -230,8 +230,8 @@ public class TaskTracker extends Thread {
 	                                Object subObj = ois.readObject();
 	                                if (subObj instanceof Integer) {
 	                                    int bytesRead = (Integer)subObj;
-	                                    byte[] buffer = (byte[])ois.readObject();
-	                                    System.out.println("Bytes received: " + bytesRead);
+//	                                    byte[] buffer = (byte[])ois.readObject();
+//	                                    System.out.println("Bytes received: " + bytesRead);
 
 	                                    if (fos == null) {
 	                                        System.out.println("FileOutputStream is null pointer.");
@@ -239,7 +239,8 @@ public class TaskTracker extends Thread {
 	                                    }
 	                                    
 	                                    // Write bytes to file
-	                                    fos.write(buffer, 0, bytesRead);
+//	                                    fos.write(buffer, 0, bytesRead);
+	                                    fos.write(bytesRead);
 	                                }
 	                                else {
 	                                    if (subObj instanceof Signal) {

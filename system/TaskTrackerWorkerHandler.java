@@ -39,12 +39,14 @@ public class TaskTrackerWorkerHandler extends Thread {
 		                		try {
 		                			FileInputStream fis = new FileInputStream(new File(JobTracker.MAPOUT_DIR + File.separator + filename));
 		                			toWorker.writeObject(new Signal(SigNum.SEND_SPLIT));
-		                			byte[] buffer = new byte[8 * 1024]; // 8KB
+//		                			byte[] buffer = new byte[1024]; // 8KB
 		                			int bytesRead;
-		                			while ((bytesRead = fis.read(buffer)) != -1) {
+//		                			while ((bytesRead = fis.read(buffer)) != -1) {
+		                			while ((bytesRead = fis.read()) != -1) {
 //		                				if (bytesRead > 0) {
+		                				System.out.println("Bytes sent: " + bytesRead);
 		                					toWorker.writeObject(new Integer(bytesRead));
-		                					toWorker.writeObject(buffer);
+//		                					toWorker.writeObject(buffer);
 //		                				}
 		                			}
 		                			fis.close();
