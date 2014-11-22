@@ -26,6 +26,7 @@ public class TaskTracker extends Thread {
     private ServerSocket clientServerSocket, workerServerSocket;
     
     public TaskTracker(String ipAddress) throws Exception {
+    	
     	new File(JobTracker.INPUT_DIR).mkdirs();
     	new File(JobTracker.OUTPUT_DIR).mkdirs();
     	

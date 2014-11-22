@@ -42,7 +42,9 @@ public class TaskTrackerClientHandler extends Thread {
                 					int bytesRead = (Integer)subObj;
                 					if (bytesRead == -1) {
                 						fos.close();
+                						System.out.println("Input split received. Sending ACK..");
                 						toClient.writeObject(new Signal(SigNum.SPLIT_RECEIVED));
+                						System.out.println("ACK sent.");
                 						break;
                 					}
                 					byte[] buffer = (byte[])fromClient.readObject();
