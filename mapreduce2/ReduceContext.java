@@ -11,7 +11,7 @@ public class ReduceContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 	private RawKeyValueIterator<KEYIN, VALUEIN> keyValueIterator;
 	private RecordWriter<KEYOUT,VALUEOUT> writer;
 	
-	public ReduceContext(JobContext jobContext, RawKeyValueIterator<KEYIN,VALUEIN> keyValueIterator, RecordWriter<KEYOUT,VALUEOUT> writer) {
+	public ReduceContext(RawKeyValueIterator<KEYIN,VALUEIN> keyValueIterator, RecordWriter<KEYOUT,VALUEOUT> writer) {
 		this.keyValueIterator = keyValueIterator;
 		this.writer = writer;
 	}

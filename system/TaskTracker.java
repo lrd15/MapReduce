@@ -183,8 +183,7 @@ public class TaskTracker extends Thread {
 	
 			StringStringIterator itr = new StringStringIterator(readers);
 			RecordWriter writer = outputFormat.getRecordWriter(job);
-			ReduceContext reduceContext = new ReduceContext<String, String, String, String>(
-					job, itr, writer);
+			ReduceContext reduceContext = new ReduceContext<String, String, String, String>(itr, writer);
 			Reducer reducer = (Reducer) job.getReducerClass().newInstance();
 			reducer.run(reduceContext);
 		} catch (InstantiationException e) {
