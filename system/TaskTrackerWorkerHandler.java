@@ -41,11 +41,15 @@ public class TaskTrackerWorkerHandler extends Thread {
 		                			toWorker.writeObject(new Signal(SigNum.SEND_SPLIT));
 		                			byte[] buffer = new byte[1024]; // 1KB
 		                			int bytesRead;
-		                			while ((bytesRead = fis.read(buffer)) != -1) {
+		                			while ((bytesRead = fis.read(buffer, 0, 1000)) != -1) {
 		                				if (bytesRead > 0) {
-		                				System.out.println("Bytes sent: " + bytesRead);
+//		                				System.out.println("Bytes sent: " + bytesRead);
 		                					toWorker.writeObject(new Integer(bytesRead));
 		                					toWorker.writeObject(buffer);
+		                					Signal s = (Signal)fromWorker.readObject();
+		                					if (s.getSignal() != SigNum.SPLIT_RECEIVED) {
+		                						System.out.println("Unexpected signal!!!");
+		                					}
 		                				}
 		                			}
 		                			fis.close();
