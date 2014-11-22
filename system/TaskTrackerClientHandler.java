@@ -69,6 +69,7 @@ public class TaskTrackerClientHandler extends Thread {
                     	case SEND_FILE_COMPLETED:
                     		System.out.println("All file splits sent. Session ended.");
                     		toClient.writeObject(new Signal(SigNum.SESSION_ENDED));
+                    		running = false;
                     		break;
 						default:
 							System.out.println("Unexpected signal received: " + sig.getSignal());
