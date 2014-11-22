@@ -38,8 +38,8 @@ public class WordCount {
 	}
 
 	public static void main(String[] args) throws Exception {
-		File path1 = new File("test/");
-		File path2 = new File("output/");
+		File path1 = new File("wc_test/");
+		File path2 = new File("wc_output/");
 		
 		Job job = Job.getInstance("wordcount");
 		
