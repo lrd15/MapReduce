@@ -60,7 +60,8 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
     	RecordWriter[] partitionWriters = new RecordWriter[numOfReducer];
     	for(int i=0; i<numOfReducer; i++) {
     		String filename = "/"+jobContext.getJobIdentifier()+id+"_"+i;
-    		partitionWriters[i] = new FileRecordWriter(new File("./"), filename);
+    		System.out.println(new File("mapout").getAbsoluteFile());
+    		partitionWriters[i] = new FileRecordWriter(new File("mapout"), filename);
     	}
     	for(Map.Entry<KEYOUT, VALUEOUT> entry : output.entrySet()) {
     		KEYOUT key = entry.getKey();

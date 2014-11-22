@@ -9,6 +9,8 @@ public abstract class InputFormat<Key, Value> {
 	
 	public abstract RecordReader<Key, Value> getRecordReader(Job job, String path, InputSplit split) throws IOException;
 	
+	public abstract String[] getFilenames();
+	
 	public abstract InputSplit[] getSplits(Job job, int numSplits) throws IOException;
 	
 	public static void main(String [] args) throws IOException {
