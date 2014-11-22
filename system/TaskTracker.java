@@ -133,9 +133,9 @@ public class TaskTracker extends Thread {
         	System.out.println("Task tracker heartbeat thread started.");
             while (running) {       
                 try {
-                	System.out.println("Sending heartbeat...");
+//                	System.out.println("Sending heartbeat...");
                 	toHandler.writeObject(new Signal(SigNum.HEARTBEAT));
-                	System.out.println("Heartbeat sent");
+//                	System.out.println("Heartbeat sent");
                     Thread.sleep(Configuration.TIMEOUT / 2);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
