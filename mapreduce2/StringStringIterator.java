@@ -20,13 +20,11 @@ public class StringStringIterator implements RawKeyValueIterator<String, String>
 	}
 
 	public String getKey() {
-		System.out.println("StringStringIterator: getKey");
 		currentKey = Collections.min(keyPool);
 		return currentKey;
 	}
 
 	public Iterable<String> getValue() throws IOException {
-		System.out.println("StringStringIterator: getValue");
 		ArrayList<String> values = new ArrayList<String>();
 		keyPool.clear();
 		for(LineRecordReader reader : readers) {
@@ -46,7 +44,6 @@ public class StringStringIterator implements RawKeyValueIterator<String, String>
 	}
 
 	public boolean next() {
-		System.out.println("StringStringIterator: next");
 		return !keyPool.isEmpty();
 	}
 
