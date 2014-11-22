@@ -80,12 +80,13 @@ public class TaskTrackerClientHandler extends Thread {
                     }
 				}
 			}
-        	taskTracker.removeClientHandler(this);
+        	
         } catch (IOException e) {
         	e.printStackTrace();
         } catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+        taskTracker.removeClientHandler(this);
     }
 }

@@ -90,7 +90,6 @@ public class WorkerHandler extends Thread {
                     }
                 }
             }
-			master.removeWorkerHandler(this);
 		} catch (SocketException e) {
 			e.printStackTrace();
 			System.out.println("Worker (" + socket.getInetAddress() + ") failed.");
@@ -108,6 +107,7 @@ public class WorkerHandler extends Thread {
 			running = false;
 			master.killWorkerHandler(this);
 		}
+        master.removeWorkerHandler(this);
     }
     
     synchronized public Object readObject() throws ClassNotFoundException, IOException {

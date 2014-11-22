@@ -69,7 +69,6 @@ public class TaskTrackerWorkerHandler extends Thread {
                     }
 				}
 			}
-			taskTracker.removeWorkerHandler(this);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -77,5 +76,6 @@ public class TaskTrackerWorkerHandler extends Thread {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+       	taskTracker.removeWorkerHandler(this);
     }
 }

@@ -241,11 +241,13 @@ public class TaskTracker extends Thread {
 	                            }
 	                        } catch (FileNotFoundException e) {
 	                            System.out.println("File Not Found: " + filenames[cur]);
+	                            socket.close();
 	                            return false;
 	                        }
 	                    }
 	                    else {
 	                        System.out.println("Unexpected signal received: " + sig.getSignal());
+	                        socket.close();
 	                        return false;
 	                    }
 	                }
