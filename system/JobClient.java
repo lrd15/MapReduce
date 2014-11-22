@@ -112,7 +112,7 @@ public class JobClient {
 			long bytesPerSplit = sourceSize / numSplits;
 			long remainingBytes = sourceSize % numSplits;
 			//loop through splits
-			for (int destIx = 1; destIx <= numSplits; destIx++) {
+			for (int destIx = 0; destIx <= numSplits-1; destIx++) {
  				System.out.println("Sending split: " + destIx);
  				ObjectOutputStream oos = toWorkers.get(ptr);
  				ObjectInputStream ois = fromWorkers.get(ptr);
@@ -146,7 +146,7 @@ public class JobClient {
  				ObjectOutputStream oos = toWorkers.get(ptr);
  				ObjectInputStream ois = fromWorkers.get(ptr);
 				oos.writeObject(new Signal(SigNum.SEND_SPLIT));
- 				oos.writeObject(file.getName()+(numSplits+1));
+ 				oos.writeObject(file.getName()+(numSplits));
  				readWrite(inputFile, oos, remainingBytes);
 				oos.writeObject(new Signal(SigNum.SEND_SPLIT_COMPLETED));
 				Object obj = ois.readObject();

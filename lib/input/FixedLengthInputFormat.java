@@ -28,7 +28,7 @@ public class FixedLengthInputFormat extends InputFormat<Long, String> {
 			System.out.println("Number of splits per file: " + numSplits);
 			System.out.println("Number of length per split: " + length);
 			for(int i=0; i<numSplits; i++) {
-				splits[i] = new FileInputSplit(file.getName(), start, length);
+				splits[i] = new FileInputSplit(file.getName()+i, start, length);
 				start += length;
 			}
 		}
