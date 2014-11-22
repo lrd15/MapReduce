@@ -46,6 +46,7 @@ public class TaskTrackerWorkerHandler extends Thread {
 //		                				System.out.println("Bytes sent: " + bytesRead);
 		                					toWorker.writeObject(new Integer(bytesRead));
 		                					toWorker.writeObject(buffer);
+		                					toWorker.reset();
 		                					Signal s = (Signal)fromWorker.readObject();
 		                					if (s.getSignal() != SigNum.SPLIT_RECEIVED) {
 		                						System.out.println("Unexpected signal!!!");
