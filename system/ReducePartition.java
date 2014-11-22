@@ -1,6 +1,8 @@
 package system;
 
-public class ReducePartition {
+import java.io.Serializable;
+
+public class ReducePartition implements Serializable {
     private int[] mapperIDs;
     private String[] filenames;
     private JobState state;
