@@ -14,7 +14,8 @@ public class FileRecordWriter extends RecordWriter<String, String> {
 		if (!dir.exists())
 			dir.mkdirs();
 		try {
-			this.writer = new PrintWriter(dir.toString() + File.separator + outputFileName);
+			System.out.println("filename isssss: " + dir.toString() + outputFileName);
+			this.writer = new PrintWriter(dir.toString() + outputFileName);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
