@@ -8,7 +8,7 @@ import java.io.RandomAccessFile;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import lib.input.InputFormat;
+import lib.input.FileInputSplit;
 import lib.input.InputSplit;
 import config.Configuration;
 import config.Job;
@@ -16,10 +16,12 @@ import config.Job;
 public class JobClient {
 
 	private Job job;
+	private ArrayList<InputSplit> inputSplits;
 	private ObjectOutputStream toMaster;
 	private ObjectInputStream fromMaster;
 
 	public JobClient() {
+		this.inputSplits = new ArrayList<InputSplit>();
 		Host master = Configuration.MASTER;
 		try {
 			Socket socket = new Socket(master.getIPAddress(), master.getPortForClient());
@@ -47,12 +49,7 @@ public class JobClient {
 	}
 
 	private void sendInputSplitsToMaster() throws InstantiationException, IllegalAccessException, IOException {
-		int numSplits = Configuration.NUM_OF_SPLITS;
-		InputFormat inputFormat = null;
-		InputSplit[] inputSplits = null;
-		inputFormat = (InputFormat) job.getInputFormatClass().newInstance();
-		inputSplits = inputFormat.getSplits(job, numSplits);
-		toMaster.writeObject(inputSplits);
+		toMaster.writeObject(this.inputSplits.toArray());
 	}
 
 	private void sendFilesToWorkers() throws IOException, ClassNotFoundException  {
@@ -71,8 +68,10 @@ public class JobClient {
 		}
 
 		File folder = job.getInputPath();
-		File[] files = folder.listFiles();
-		splitAndSend(files, toWorkers, fromWorkers);
+		if(!folder.isDirectory()) {
+			throw new IOException("The input path is not a directory");
+		}
+		splitAndSend(folder.listFiles(), toWorkers, fromWorkers);
 		
 		for(int i=0; i < toWorkers.size(); i++) {
 			toWorkers.get(i).writeObject(new Signal(SigNum.SEND_FILE_COMPLETED));
@@ -95,23 +94,23 @@ public class JobClient {
 										    ArrayList<ObjectInputStream> fromWorkers) throws IOException, ClassNotFoundException {
 		int ptr = 0;
 		int numOfWorker = toWorkers.size();
-		long numSplits = Configuration.NUM_OF_SPLITS;
+		int numSplits = Configuration.NUM_OF_SPLITS;
 		long maxReadBufferSize = 8 * 1024; //8KB
 		
 		//loop through files
 		for(File file : files) {
 			String filename = this.job.getInputPath() + File.separator + file.getName();
 			RandomAccessFile inputFile = new RandomAccessFile(filename, "r");
-			System.out.println("Sending file: " + filename);
 			long sourceSize = inputFile.length();
 			long bytesPerSplit = sourceSize / numSplits;
 			long remainingBytes = sourceSize % numSplits;
 			//loop through splits
-			for (int destIx = 0; destIx <= numSplits-1; destIx++) {
- 				ObjectOutputStream oos = toWorkers.get(ptr);
+			for (int spl = 0; spl < numSplits; spl++) {
+				String splitFilename = job.getID() + "_" + spl + "_" + file.getName();
+				ObjectOutputStream oos = toWorkers.get(ptr);
  				ObjectInputStream ois = fromWorkers.get(ptr);
 				oos.writeObject(new Signal(SigNum.SEND_SPLIT));
- 				oos.writeObject(file.getName()+destIx);
+ 				oos.writeObject(splitFilename);
  				if (bytesPerSplit > maxReadBufferSize) {
  					long numReads = bytesPerSplit / maxReadBufferSize;
  					long numRemainingRead = bytesPerSplit % maxReadBufferSize;
@@ -134,13 +133,16 @@ public class JobClient {
  				} else {
  					System.err.println("wrong object");
  				}
-				ptr = (ptr+1) % numOfWorker; //TODO
+ 				InputSplit thisSplit = new FileInputSplit(splitFilename, 0, bytesPerSplit);
+ 				this.inputSplits.add(thisSplit);
+				ptr = (ptr+1) % numOfWorker; 
  			}
  			if (remainingBytes > 0) {
+ 				String splitFilename = job.getID() + "_" + numSplits + "_" + file.getName();
  				ObjectOutputStream oos = toWorkers.get(ptr);
  				ObjectInputStream ois = fromWorkers.get(ptr);
 				oos.writeObject(new Signal(SigNum.SEND_SPLIT));
- 				oos.writeObject(file.getName()+(numSplits));
+ 				oos.writeObject(splitFilename);
  				readWrite(inputFile, oos, remainingBytes);
 				oos.writeObject(new Signal(SigNum.SEND_SPLIT_COMPLETED));
 				Object obj = ois.readObject();
@@ -152,6 +154,8 @@ public class JobClient {
  				} else {
  					System.err.println("wrong object");
  				}
+ 				InputSplit thisSplit = new FileInputSplit(splitFilename, 0, remainingBytes);
+ 				this.inputSplits.add(thisSplit);
 				ptr = (ptr+1) % numOfWorker;
  			}
 			
