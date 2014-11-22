@@ -40,23 +40,26 @@ public class TaskTrackerClientHandler extends Thread {
                     			Object subObj = fromClient.readObject();
                     			if (subObj instanceof Integer) {
                 					int bytesRead = (Integer)subObj;
-                					if (bytesRead == -1) {
-                						fos.close();
-                						System.out.println("Input split received. Sending ACK..");
-                						toClient.writeObject(new Signal(SigNum.SPLIT_RECEIVED));
-                						System.out.println("ACK sent.");
-                						break;
-                					}
                 					byte[] buffer = (byte[])fromClient.readObject();
                 					System.out.println("Bytes received: " + bytesRead);
-                					// Write bytes to file
+
                 					if (fos == null)
                 						System.out.println("FileOutputStream is null pointer.");
+                					
+                					// Write bytes to file
                 					fos.write(buffer, 0, bytesRead);
                 				}
                     			else {
-                    				if (subObj instanceof Signal)
-                    					System.out.println("Unexpected signal received: " + ((Signal)subObj).getSignal());
+                    				if (subObj instanceof Signal) {
+                    					if (((Signal)subObj).getSignal() == SigNum.SEND_SPLIT_COMPLETED) {
+		                					fos.close();
+		            						System.out.println("Input split received. Sending ACK..");
+		            						toClient.writeObject(new Signal(SigNum.SPLIT_RECEIVED));
+		            						System.out.println("ACK sent.");
+                    					}
+                    					else
+                    						System.out.println("Unexpected signal received: " + ((Signal)subObj).getSignal());
+                    				}
                     				else
                     					System.out.println("Unexpected object received.");
                     				break;
@@ -64,8 +67,8 @@ public class TaskTrackerClientHandler extends Thread {
                     		}
                     		break;
                     	case SEND_FILE_COMPLETED:
-                    		running = false;
                     		System.out.println("All file splits sent. Session ended.");
+                    		toClient.writeObject(new Signal(SigNum.SESSION_ENDED));
                     		break;
 						default:
 							System.out.println("Unexpected signal received: " + sig.getSignal());
