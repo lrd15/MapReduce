@@ -2,8 +2,9 @@ package mapreduce2;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import lib.input.RecordReader;
 import lib.output.FileRecordWriter;
@@ -11,14 +12,14 @@ import lib.output.RecordWriter;
 import config.Configuration;
 import config.JobContext;
 
-public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
+public class MapContext<KEYIN, VALUEIN, KEYOUT extends Comparable<KEYOUT>, VALUEOUT> {
 
 	private JobContext jobContext;
-	private TreeMap<KEYOUT, VALUEOUT> output;
+	private List<KeyValuePair> output;
 	private RecordReader<KEYIN, VALUEIN> reader;
 	private Partitioner<KEYOUT, VALUEOUT> partitioner;
 	
-	private static int id = 0;
+	private static int instanceID = 0;
 
     public MapContext(JobContext jobContext,
     				  RecordReader<KEYIN,VALUEIN> reader, 
@@ -26,8 +27,8 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
     	this.jobContext = jobContext;
     	this.reader = reader;
     	this.partitioner = partitioner;
-    	this.output = new TreeMap<KEYOUT, VALUEOUT>();
-    	id++;
+    	this.output = new ArrayList<KeyValuePair>();
+    	instanceID++;
     }
     
     public KEYIN getCurrentKey() throws IOException {
@@ -43,20 +44,21 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
     }
     
     public void write(KEYOUT key, VALUEOUT value) throws IOException {
-    	this.output.put(key, value);
+    	this.output.add(new KeyValuePair(key, value));
 	}
     
     public void close() throws IOException {
+    	System.out.println("total: "+output.size());
     	int numOfReducer = Configuration.NUM_OF_REDUCERS;
     	RecordWriter[] partitionWriters = new RecordWriter[numOfReducer];
     	for(int i=0; i<numOfReducer; i++) {
-    		String filename = "/"+jobContext.getJobIdentifier()+id+"_"+i;
-    		System.out.println(new File("mapout").getAbsoluteFile());
+    		String filename = filenameGenerator(i);
     		partitionWriters[i] = new FileRecordWriter(new File("mapout"), filename);
     	}
-    	for(Map.Entry<KEYOUT, VALUEOUT> entry : output.entrySet()) {
-    		KEYOUT key = entry.getKey();
-    		VALUEOUT value = entry.getValue();
+    	Collections.sort(this.output);
+    	for(KeyValuePair pair : this.output) {
+    		KEYOUT key = pair.key;
+    		VALUEOUT value = pair.value;
     		int index = this.partitioner.getPartition(key, value, numOfReducer);
     		partitionWriters[index].write(key, value);
     	}
@@ -65,5 +67,24 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
     	}
 		this.reader.close();
 	}
+    
+    private String filenameGenerator(int reducerID) {
+    	return "/" + jobContext.getJobIdentifier() + instanceID + "_" + reducerID;
+    }
    
+    private class KeyValuePair implements Comparable<KeyValuePair>{
+    	private KEYOUT key;
+    	private VALUEOUT value;
+    	
+    	public KeyValuePair(KEYOUT k, VALUEOUT v) {
+    		this.key = k;
+    		this.value = v;
+    	}
+
+		@Override
+		public int compareTo(KeyValuePair anotherPair) {
+			return this.key.compareTo(anotherPair.key);
+		}
+    }
+    
 }

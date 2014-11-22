@@ -18,13 +18,13 @@ public class FixedLengthRecordReader extends RecordReader<Long, String> {
 	
 	public FixedLengthRecordReader(String path, InputSplit split, int recordSize) throws IOException {
 		FileInputSplit fis = (FileInputSplit)split;
-		this.file = new RandomAccessFile(new File(path+File.separator+fis.getFilename()), "r");
-		
+		File fileToRead = new File(path+File.separator+fis.getFilename());
+		this.file = new RandomAccessFile(fileToRead, "r");
 		long start = fis.getStart();
 		file.seek(start);
 		long totalLength = fis.getLength();
 		this.recordSize = recordSize;
-		
+
 		this.kstart = start / this.recordSize;
 		this.ktotal = totalLength / this.recordSize;
 		this.counter = 0;
@@ -32,29 +32,27 @@ public class FixedLengthRecordReader extends RecordReader<Long, String> {
 	
 	public boolean nextKeyValue() throws IOException {
 		//check if all data are read
-		System.out.println("FixedLengthRecordReader: nextKeyValue");
-		if(ktotal <= counter) {
-			this.key = null;
-			this.value = null;
-			return false;
+		if(ktotal > counter) {
+			byte[] bytes = new byte[recordSize];
+			if (file.read(bytes) != -1) {
+				this.key = new Long(kstart+counter);
+				this.value = new String(bytes);
+				counter++;
+				return true;
+			}
 		}
-
-		byte[] bytes = new byte[recordSize];
-		if (file.read(bytes) != -1) {
-			this.key = new Long(kstart+counter);
-			this.value = new String(bytes);
-			counter++;
-		}
-		return true;
+		this.key = null;
+		this.value = null;
+		return false;
 	}
 	
 	public Long getCurrentKey() {
-		System.out.println("FixedLengthRecordReader: getCurrentKey");
+		System.out.println("CurrentKey: " + this.key);
 		return this.key;
 	}
 	
 	public String getCurrentValue() {
-		System.out.println("FixedLengthRecordReader: getCurrentValue");
+		System.out.println("CurrentValue: " + this.value);
 		return this.value;
 	}
 		

@@ -2,7 +2,7 @@ package mapreduce2;
 
 import java.io.IOException;
 
-public abstract class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
+public abstract class Mapper<KEYIN, VALUEIN, KEYOUT extends Comparable<KEYOUT>, VALUEOUT> {
 	
 	public void setup(MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> context) { 
 		//empty for this project

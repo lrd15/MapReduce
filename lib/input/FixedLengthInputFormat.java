@@ -39,7 +39,7 @@ public class FixedLengthInputFormat extends InputFormat<Long, String> {
 				String filename = file.getName()+i;
 				this.filenames[i] = filename;
 				splits[i] = new FileInputSplit(filename, start, length);
-				start += length;
+				//start += length;
 			}
 		}
 		return splits;

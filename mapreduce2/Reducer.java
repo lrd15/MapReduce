@@ -2,7 +2,7 @@ package mapreduce2;
 
 import java.io.IOException;
 
-public class Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
+public abstract class Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
     
 	public void setup(ReduceContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> context) { }
 	
@@ -10,11 +10,7 @@ public class Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 		context.close();
 	}
 	
-	public void reduce(KEYIN key, Iterable<VALUEIN> values, ReduceContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> context) throws IOException {
-		for(VALUEIN value : values) {
-			context.write((KEYOUT)key, (VALUEOUT)value);
-		}
-	}
+	public abstract void reduce(KEYIN key, Iterable<VALUEIN> values, ReduceContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> context) throws IOException;
 	
 	public void run(ReduceContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> context) throws IOException { 
 		setup(context);

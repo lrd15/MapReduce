@@ -6,15 +6,7 @@ import config.Job;
 
 
 public abstract class OutputFormat<Key, Value> {
+
 	public abstract RecordWriter<Key, Value> getRecordWriter(Job job) throws IOException;
-	
-	public static void main(String [] args) throws IOException {
-//		Path path = FileSystems.getDefault().getPath("./test/");
-//		Job job = Job.getInstance(null, "test output");
-//		FileOutputFormat.addInputPaths(job, path);
-//		FileOutputFormat outputFormet = new FileOutputFormat();
-//		RecordWriter recordWriter = outputFormet.getRecordWriter(job, "output1");
-//		recordWriter.write("test", "value");
-//		recordWriter.close();
-	}
+
 }
