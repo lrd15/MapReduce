@@ -8,12 +8,10 @@ import lib.output.RecordWriter;
 
 public class ReduceContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
-	private JobContext jobContext;
 	private RawKeyValueIterator<KEYIN, VALUEIN> keyValueIterator;
 	private RecordWriter<KEYOUT,VALUEOUT> writer;
 	
 	public ReduceContext(JobContext jobContext, RawKeyValueIterator<KEYIN,VALUEIN> keyValueIterator, RecordWriter<KEYOUT,VALUEOUT> writer) {
-		this.jobContext = jobContext;
 		this.keyValueIterator = keyValueIterator;
 		this.writer = writer;
 	}
