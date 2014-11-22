@@ -130,7 +130,7 @@ public class TaskTracker extends Thread {
     // Periodically send heartbeat to job tracker
     private class HeartbeatThread extends Thread {
         @Override
-        synchronized public void run() {
+        public void run() {
         	System.out.println("Task tracker heartbeat thread started.");
             while (running) {       
                 try {

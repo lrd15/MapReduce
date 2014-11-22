@@ -93,12 +93,14 @@ public class WorkerHandler extends Thread {
 		} catch (SocketTimeoutException e) { // Timeout -> tracker dies
             alive = false;
             running = false;
+            master.killWorkerHandler(this);
         } catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 			alive = false;
 			running = false;
+			master.killWorkerHandler(this);
 		}
     }
     

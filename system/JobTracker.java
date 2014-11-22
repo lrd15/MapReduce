@@ -125,6 +125,7 @@ public class JobTracker extends Thread {
     
     public void addJob(Job job) {
     	jobMap.put(job.getID(), job);
+    	System.out.println("Job #" + job.getID() + " added.");
     }
     
     public Job getJob(int id) {
@@ -133,6 +134,7 @@ public class JobTracker extends Thread {
     
     public void removeJob(int id) {
     	jobMap.remove(id);
+    	System.out.println("Job #" + id + " removed.");
     }
     
     public void removeWorkerHandler(WorkerHandler wh) {
@@ -145,18 +147,22 @@ public class JobTracker extends Thread {
     
     public void addMapJob(MapJob job) {
     	mapJobList.add(job);
+    	System.out.println("MapJob #" + job.getID() + " added.");
     }
     
     public void addReduceJob(ReduceJob job) {
     	reduceJobList.add(job);
+    	System.out.println("ReduceJob #" + job.getID() + " added.");
     }
     
     public void removeMapJob(MapJob job) {
     	mapJobList.remove(job);
+    	System.out.println("MapJob #" + job.getID() + " removed.");
     }
     
     public void removeReduceJob(ReduceJob job) {
     	reduceJobList.remove(job);
+    	System.out.println("ReduceJob #" + job.getID() + " removed.");
     }
 
     public ReduceJob getReduceJob(int jobID) {
@@ -304,11 +310,21 @@ public class JobTracker extends Thread {
     private JobTracker getThis() {
         return this;
     }
+    
+    public void killWorkerHandler(WorkerHandler wh) {
+    	// If wh is doing MAP_JOB
+    	
+    	// If wh is doing REDUCE_JOB
+    	
+    	// If wh has completed some map job splits
+    	// -> redo because intermediate files are
+    	// no longer accessible
+    }
 
     // Check whether workers are alive
     private class HeartbeatThread extends Thread {
         @Override
-        synchronized public void run() {
+        public void run() {
             while (running) {
 //            	System.out.println("Worker handler list size = " + workerHandlerList.size());
                 for (int i = 0; i < workerHandlerList.size(); i++) {
