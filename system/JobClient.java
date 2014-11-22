@@ -174,6 +174,7 @@ public class JobClient {
  		if (bytesRead != -1) {
  			oos.writeObject(new Integer(bytesRead));
  			oos.writeObject(buf);
+ 			oos.reset();
  		}
  	}
 }
