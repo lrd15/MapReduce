@@ -95,11 +95,12 @@ public class TaskTracker extends Thread {
 					switch (sig.getSignal()) {
 					case INIT_MAP:
 						System.out.println("New map request coming...");
+						int splitIdx = (Integer)fromHandler.readObject();
 						job = (Job) fromHandler.readObject();
 						InputSplit inputSplit = (InputSplit) fromHandler
 								.readObject();
 						String[] filenames = new String[Configuration.NUM_OF_REDUCERS];
-						success = doMap(job, inputSplit, filenames);
+						success = doMap(job, splitIdx, inputSplit, filenames);
 						if (success) {
 							System.out.println("Map operation completed.");
 							toHandler.writeObject(new Signal(
@@ -138,12 +139,13 @@ public class TaskTracker extends Thread {
 	}
 
 	// Return true if successful
-	private boolean doMap(Job job, InputSplit inputSplit, String[] filenames) {
+	private boolean doMap(Job job, int splitIdx, InputSplit inputSplit, String[] filenames) {
 		try {
 			InputFormat inputFormat = (InputFormat) job.getInputFormatClass().newInstance();
 			Partitioner partitioner = (Partitioner) job.getPartitionerClass().newInstance();
 			RecordReader<Long, String> reader = inputFormat.getRecordReader(job, JobTracker.MAPIN_DIR, inputSplit);
-			MapContext mapContext = new MapContext<Long, String, String, String>(job, reader, partitioner);
+			String identifier = job.getID() + "_" + splitIdx;
+			MapContext mapContext = new MapContext<Long, String, String, String>(job, identifier, reader, partitioner);
 			Mapper mapper = (Mapper) job.getMapperClass().newInstance();
 			mapper.run(mapContext);
 			String[] outputFilenames = mapContext.getFilenames();

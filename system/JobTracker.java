@@ -238,6 +238,7 @@ public class JobTracker extends Thread {
             int jobID, int splitIdx) {
         try {
 			wh.writeObject(new Signal(SigNum.INIT_MAP));
+			wh.writeObject(new Integer(splitIdx));
 			wh.writeObject(getJob(jobID));
 			wh.writeObject(split.getInputSplit());
 		} catch (IOException e) {
