@@ -31,7 +31,7 @@ public class JobTracker extends Thread {
     public static final String INPUT_DIR = "input";
     public static final String OUTPUT_DIR = "output";
 
-    public JobTracker() throws IOException {
+    public JobTracker() {
         nextClientID = 0;
         nextWorkerID = 0;
         running = true;
@@ -43,34 +43,41 @@ public class JobTracker extends Thread {
         jobMap = new HashMap<Integer, Job>();
         mapJobList = new ArrayList<MapJob>();
         reduceJobList = new ArrayList<ReduceJob>();
-        clientServerSocket = new ServerSocket(Configuration.MASTER.getPortForClient());
-        workerServerSocket = new ServerSocket(Configuration.MASTER.getPortForWorker());
+        
+    }
+
+    @Override
+    public void run() {
+    	try {
+			clientServerSocket = new ServerSocket(Configuration.MASTER.getPortForClient());
+			workerServerSocket = new ServerSocket(Configuration.MASTER.getPortForWorker());
+		} catch (IOException e) {
+			return;
+		}
+        
 
         ClientListener clientListener = new ClientListener();
         clientListener.start();
         WorkerListener workerListener = new WorkerListener();
         workerListener.start();
-    }
-
-    @Override
-    public void run() {
+        
         // Start a separate thread to check if each worker is alive
         HeartbeatThread heartbeatThread = new HeartbeatThread();
         heartbeatThread.start();
         System.out.println("Heartbeat thread started.");
         
         while (running) {
-        	if (jobMap.size() > 0)
-        		System.out.println("# of Job = " + jobMap.size());
-        	if (mapJobList.size() > 0)
-        		System.out.println("# of MapJob = " + mapJobList.size());
-        	if (reduceJobList.size() > 0)
-        		System.out.println("# of ReduceJob = " + reduceJobList.size());
+//        	if (jobMap.size() > 0)
+//        		System.out.println("# of Job = " + jobMap.size());
+//        	if (mapJobList.size() > 0)
+//        		System.out.println("# of MapJob = " + mapJobList.size());
+//        	if (reduceJobList.size() > 0)
+//        		System.out.println("# of ReduceJob = " + reduceJobList.size());
             if (hasJob()) {
-            	System.out.println("Has job...");
+//            	System.out.println("Has job...");
                 boolean done = false;
                 if (shouldDoMap) {
-                	System.out.println("Doing map next...");
+//                	System.out.println("Doing map next...");
                     if (hasMapJob()) {
                         MapJob job = getCurrentMapJob();
                         MapJobSplit[] splits = job.getSplits();
@@ -84,12 +91,12 @@ public class JobTracker extends Thread {
 								for (Host host : hosts) {
 									System.out.println("Trying host (" + host.getIPAddress().getHostAddress() + ")...");
                                     WorkerHandler wh = getWorkerHandler(host);
-                                    System.out.println("WorkerHandler (" + wh.getSocket().getLocalAddress() + ") is " + wh.getWorkerState());
+                                    System.out.println("WorkerHandler (" + wh.getSocket().getInetAddress() + ") is " + wh.getWorkerState());
                                     if (wh != null && wh.isIdle()) { // Found idle worker
                                     	System.out.println("Initiating map operation...");
                                         done = initMap(wh, split, job.getID(), i);
                                         if (done) {
-                                        	System.out.println("Worker (" + wh.getSocket().getLocalAddress() +
+                                        	System.out.println("Worker (" + wh.getSocket().getInetAddress() +
                                         			") assigned for map operation: JobID = " + job.getID() + ", SplitId = " + i);
                                         	break;
                                         }
@@ -106,7 +113,7 @@ public class JobTracker extends Thread {
                     }
                 }
                 else {
-                	System.out.println("Doing reduce next...");
+//                	System.out.println("Doing reduce next...");
                     if (hasReduceJob()) {
                         ReduceJob job = getCurrentReduceJob();
                         if (job.hasNextIdlePartition()) {
@@ -114,10 +121,10 @@ public class JobTracker extends Thread {
                             ReducePartition partition = job.getPartition(idx);
                             for (WorkerHandler wh : workerHandlerList)
                                 if (wh.isIdle()) { // Found idle worker
-                                	System.out.println("Initiating reduce operatino...");
+                                	System.out.println("Initiating reduce operation...");
                                     done = initReduce(wh, partition, job.getID(), idx);
                                     if (done) {
-                                    	System.out.println("Worker (" + wh.getSocket().getLocalAddress() +
+                                    	System.out.println("Worker (" + wh.getSocket().getInetAddress() +
                                     			") assigned for reduce operation: JobID = " + job.getID() + ", PartitionId = " + idx);
                                     	job.decNumIdle();
                                     	break;
@@ -130,10 +137,15 @@ public class JobTracker extends Thread {
                 }
                 toNextJob();
             }
+            try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
         }
     }
     
-    public void addJob(Job job) {
+    synchronized public void addJob(Job job) {
     	jobMap.put(job.getID(), job);
     	System.out.println("Job #" + job.getID() + " added.");
     }
@@ -142,35 +154,35 @@ public class JobTracker extends Thread {
     	return jobMap.get(id);
     }
     
-    public void removeJob(int id) {
+    synchronized public void removeJob(int id) {
     	jobMap.remove(id);
     	System.out.println("Job #" + id + " removed.");
     }
     
-    public void removeWorkerHandler(WorkerHandler wh) {
+    synchronized public void removeWorkerHandler(WorkerHandler wh) {
     	workerHandlerList.remove(wh);
     }
     
-    public void removeClientHandler(ClientHandler ch) {
+    synchronized public void removeClientHandler(ClientHandler ch) {
     	clientHandlerList.remove(ch);
     }
     
-    public void addMapJob(MapJob job) {
+    synchronized public void addMapJob(MapJob job) {
     	mapJobList.add(job);
     	System.out.println("MapJob #" + job.getID() + " added.");
     }
     
-    public void addReduceJob(ReduceJob job) {
+    synchronized public void addReduceJob(ReduceJob job) {
     	reduceJobList.add(job);
     	System.out.println("ReduceJob #" + job.getID() + " added.");
     }
     
-    public void removeMapJob(MapJob job) {
+    synchronized public void removeMapJob(MapJob job) {
     	mapJobList.remove(job);
     	System.out.println("MapJob #" + job.getID() + " removed.");
     }
     
-    public void removeReduceJob(ReduceJob job) {
+    synchronized public void removeReduceJob(ReduceJob job) {
     	reduceJobList.remove(job);
     	System.out.println("ReduceJob #" + job.getID() + " removed.");
     }
@@ -204,7 +216,7 @@ public class JobTracker extends Thread {
         return null;
     }
 
-    private boolean initMap(WorkerHandler wh, MapJobSplit split,
+    synchronized private boolean initMap(WorkerHandler wh, MapJobSplit split,
             int jobID, int splitIdx) {
         try {
 			wh.writeObject(new Signal(SigNum.INIT_MAP));
@@ -221,7 +233,7 @@ public class JobTracker extends Thread {
         return true;
     }
 
-    private boolean initReduce(WorkerHandler wh, ReducePartition partition,
+    synchronized private boolean initReduce(WorkerHandler wh, ReducePartition partition,
             int jobID, int partitionIdx) {
         try {
         	wh.writeObject(new Signal(SigNum.INIT_REDUCE));
@@ -238,7 +250,7 @@ public class JobTracker extends Thread {
         return true;
     }
 
-    public void migrate(MapJob mapJob) {
+    synchronized public void migrate(MapJob mapJob) {
     	System.out.println("Migrating map job " + mapJob.getID() + " to reduce job list...");
         MapJobSplit[] splits = mapJob.getSplits();
         if (splits.length == 0)
@@ -268,14 +280,14 @@ public class JobTracker extends Thread {
         System.out.println("Map job " + mapJob.getID() + "migrated to reduce job list.");
     }
 
-    private void advanceMapIdx() {
+    synchronized private void advanceMapIdx() {
         if (!hasMapJob())
             curMapJobIdx = 0;
         else
             curMapJobIdx = (curMapJobIdx + 1) % mapJobList.size();
     }
 
-    private void advanceReduceIdx() {
+    synchronized private void advanceReduceIdx() {
         if (!hasReduceJob())
             curReduceJobIdx = 0;
         else
@@ -290,7 +302,7 @@ public class JobTracker extends Thread {
         return reduceJobList.get(curReduceJobIdx);
     }
 
-    private boolean hasMapJob() {
+    public boolean hasMapJob() {
         return mapJobList.size() > 0;
     }
 
@@ -302,7 +314,7 @@ public class JobTracker extends Thread {
         return hasMapJob() || hasReduceJob();
     }
 
-    private void toNextJob() {
+    synchronized private void toNextJob() {
         if (shouldDoMap)
             advanceMapIdx();
         else
@@ -314,8 +326,8 @@ public class JobTracker extends Thread {
     	System.out.println("Trying to get worker handler by host...");
     	System.out.println("Host ip: " + host.getIPAddress().getHostAddress());
         for (WorkerHandler wh : workerHandlerList) {
-        	System.out.println("WorkerHandler ip: " + wh.getSocket().getLocalAddress().getHostAddress());
-            if (wh.getSocket().getLocalAddress().getHostAddress().equals(host.getIPAddress().getHostAddress()))
+        	System.out.println("WorkerHandler ip: " + wh.getSocket().getInetAddress().getHostAddress());
+            if (wh.getSocket().getInetAddress().getHostAddress().equals(host.getIPAddress().getHostAddress()))
                 return wh;
         }
         return null;
@@ -326,7 +338,7 @@ public class JobTracker extends Thread {
         return this;
     }
     
-    public void killWorkerHandler(WorkerHandler wh) {
+    synchronized public void killWorkerHandler(WorkerHandler wh) {
     	// If wh is doing MAP_JOB
     	
     	// If wh is doing REDUCE_JOB
@@ -351,7 +363,7 @@ public class JobTracker extends Thread {
 //                		System.out.println("not alive.");
                     if (!wh.alive()) {
                         // Worker Failure
-                    	System.out.println("Worker (" + wh.getSocket().getLocalAddress() + ") failed.");
+                    	System.out.println("Worker (" + wh.getSocket().getInetAddress() + ") failed.");
                     	workerHandlerList.remove(i--);
                     }
                 }
@@ -403,12 +415,19 @@ public class JobTracker extends Thread {
     }
     
     public static void main(String[] args) {
-    	try {
+//    	try {
     		JobTracker jobTracker = new JobTracker();
+//    		try {
+//				Thread.sleep(10000);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//    		jobTracker.hashCode();
 //    		System.out.println("main: " + jobTracker.hashCode());
     		jobTracker.start();
-    	} catch (IOException e) {
-    		e.printStackTrace();
-    	}
+//    	} catch (IOException e) {
+//    		e.printStackTrace();
+//    	}
     }
 }

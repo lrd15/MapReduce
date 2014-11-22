@@ -87,7 +87,7 @@ public class WorkerHandler extends Thread {
             } 
 		} catch (SocketException e) {
 			e.printStackTrace();
-			System.out.println("Worker (" + socket.getLocalAddress() + ") failed.");
+			System.out.println("Worker (" + socket.getInetAddress() + ") failed.");
 			alive = false;
             running = false;
 		} catch (SocketTimeoutException e) { // Timeout -> tracker dies

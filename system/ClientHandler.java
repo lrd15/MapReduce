@@ -53,6 +53,8 @@ public class ClientHandler extends Thread {
 	                            MapJob mapJob = new MapJob(id, splits);
 //	                            System.out.println("ClientHandler: " + master.hashCode());
 	                            master.addMapJob(mapJob);
+//	                            if (master.hasMapJob())
+//	                            	System.out.println("-----------------------");
 	                            running = false; // End this session
 	                            System.out.println(splits.length + " input splits received. Client session ended.");
 		                        break;
