@@ -2,8 +2,6 @@ package mapreduce2;
 
 import java.io.IOException;
 
-import config.JobContext;
-
 import lib.output.RecordWriter;
 
 public class ReduceContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {

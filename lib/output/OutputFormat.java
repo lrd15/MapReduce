@@ -7,6 +7,6 @@ import config.Job;
 
 public abstract class OutputFormat<Key, Value> {
 
-	public abstract RecordWriter<Key, Value> getRecordWriter(Job job) throws IOException;
+	public abstract RecordWriter<Key, Value> getRecordWriter(Job job, String outputFileName) throws IOException;
 
 }
