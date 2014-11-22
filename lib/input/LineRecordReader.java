@@ -37,7 +37,6 @@ public class LineRecordReader extends RecordReader<String, String> {
 	@Override
 	public boolean nextKeyValue() throws IOException {
 		//check if all data are read
-		System.out.println("LineRecordReader: nextKeyValue");
 		if(!readWholeFile && count >= length) {
 			this.key = null;
 			this.value = null;
@@ -63,13 +62,11 @@ public class LineRecordReader extends RecordReader<String, String> {
 
 	@Override
 	public String getCurrentKey() throws IOException {
-		System.out.println("LineRecordReader: getCurrentKey");
 		return this.key;
 	}
 
 	@Override
 	public String getCurrentValue() throws IOException {
-		System.out.println("LineRecordReader: getCurrentValue");
 		return this.value;
 	}
 
