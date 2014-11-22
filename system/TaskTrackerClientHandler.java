@@ -42,6 +42,7 @@ public class TaskTrackerClientHandler extends Thread {
                 					int bytesRead = (Integer)subObj;
                 					if (bytesRead == -1) {
                 						fos.close();
+                						toClient.writeObject(new Signal(SigNum.SPLIT_RECEIVED));
                 						break;
                 					}
                 					byte[] buffer = (byte[])fromClient.readObject();
