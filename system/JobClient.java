@@ -128,6 +128,7 @@ public class JobClient {
 						break;
 					n -= bytesWritten;
 				}
+				System.out.println("wait reading signal");
 				Object obj = ois.readObject();
 				if (obj instanceof Signal) {
 					Signal sig = (Signal)obj;
