@@ -40,8 +40,10 @@ public class ClientHandler extends Thread {
 		                        System.out.println("Assign job id: " + id);
 		                        break;
 		                    case SEND_JOB_CONTEXT:
+		                    	System.out.println("Receiving job object...");
 		                    	Job job = (Job)fromClient.readObject();
 		                    	master.addJob(job);
+		                    	System.out.println("Job object received.");
 		                    	break;
 		                    case ADD_JOB_COMPLETED:
 		                    	System.out.println("Splits sending completed.");

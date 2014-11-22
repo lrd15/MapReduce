@@ -61,8 +61,10 @@ public class JobTracker extends Thread {
         
         while (running) {
             while (hasJob()) {
+            	System.out.println("Has job...");
                 boolean done = false;
                 if (shouldDoMap) {
+                	System.out.println("Doing map next...");
                     if (hasMapJob()) {
                         MapJob job = getCurrentMapJob();
                         MapJobSplit[] splits = job.getSplits();
@@ -98,6 +100,7 @@ public class JobTracker extends Thread {
                     }
                 }
                 else {
+                	System.out.println("Doing reduce next...");
                     if (hasReduceJob()) {
                         ReduceJob job = getCurrentReduceJob();
                         if (job.hasNextIdlePartition()) {
@@ -292,7 +295,7 @@ public class JobTracker extends Thread {
     }
 
     private boolean hasJob() {
-        return hasMapJob() && hasReduceJob();
+        return hasMapJob() || hasReduceJob();
     }
 
     private void toNextJob() {
