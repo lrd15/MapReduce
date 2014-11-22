@@ -25,7 +25,7 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
     public MapContext(JobContext jobContext,
     				  RecordReader<KEYIN,VALUEIN> reader, 
     				  //RecordWriter<KEYOUT,VALUEOUT> writer, 
-    				  InputSplit inputSplit, 
+    				  //InputSplit inputSplit, 
     				  Partitioner<KEYOUT, VALUEOUT> partitioner) {
     	this.jobContext = jobContext;
     	this.reader = reader;
