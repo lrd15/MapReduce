@@ -17,6 +17,8 @@ public class ClientHandler extends Thread {
 
     public ClientHandler(JobTracker master, int id, Socket socket) throws IOException {
         this.master = master;
+//        System.out.println("ClientHandler constructor master: " + master.hashCode());
+//        System.out.println("ClientHandler constructor this.master: " + this.master.hashCode());
         this.id = id;
         this.socket = socket;
         running = true;
@@ -49,6 +51,7 @@ public class ClientHandler extends Thread {
 		                    	System.out.println("Splits sending completed.");
 		                    	InputSplit[] splits = (InputSplit[])fromClient.readObject();
 	                            MapJob mapJob = new MapJob(id, splits);
+//	                            System.out.println("ClientHandler: " + master.hashCode());
 	                            master.addMapJob(mapJob);
 	                            running = false; // End this session
 	                            System.out.println(splits.length + " input splits received. Client session ended.");

@@ -60,7 +60,13 @@ public class JobTracker extends Thread {
         System.out.println("Heartbeat thread started.");
         
         while (running) {
-            while (hasJob()) {
+        	if (jobMap.size() > 0)
+        		System.out.println("# of Job = " + jobMap.size());
+        	if (mapJobList.size() > 0)
+        		System.out.println("# of MapJob = " + mapJobList.size());
+        	if (reduceJobList.size() > 0)
+        		System.out.println("# of ReduceJob = " + reduceJobList.size());
+            if (hasJob()) {
             	System.out.println("Has job...");
                 boolean done = false;
                 if (shouldDoMap) {
@@ -123,8 +129,6 @@ public class JobTracker extends Thread {
                     }
                 }
                 toNextJob();
-                if (done)
-                    break;
             }
         }
     }
@@ -307,13 +311,18 @@ public class JobTracker extends Thread {
     }
 
     private WorkerHandler getWorkerHandler(Host host) {
-        for (WorkerHandler wh : workerHandlerList)
+    	System.out.println("Trying to get worker handler by host...");
+    	System.out.println("Host ip: " + host.getIPAddress().getHostAddress());
+        for (WorkerHandler wh : workerHandlerList) {
+        	System.out.println("WorkerHandler ip: " + wh.getSocket().getLocalAddress().getHostAddress());
             if (wh.getSocket().getLocalAddress().getHostAddress().equals(host.getIPAddress().getHostAddress()))
                 return wh;
+        }
         return null;
     }
 
     private JobTracker getThis() {
+//    	System.out.println("getThis(): " + this.hashCode());
         return this;
     }
     
@@ -396,6 +405,7 @@ public class JobTracker extends Thread {
     public static void main(String[] args) {
     	try {
     		JobTracker jobTracker = new JobTracker();
+//    		System.out.println("main: " + jobTracker.hashCode());
     		jobTracker.start();
     	} catch (IOException e) {
     		e.printStackTrace();
