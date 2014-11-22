@@ -79,15 +79,9 @@ public class JobClient {
 		File[] files = folder.listFiles();
 		splitAndSend(files, toWorkers, fromWorkers);
 		
-		try {
-			Thread.sleep(20000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
 		for(int i=0; i < toWorkers.size(); i++) {
-			//TODO toWorkers.get(i).writeObject(new Signal(SigNum.SEND_FILE_COMPLETED));
+			toWorkers.get(i).writeObject(new Signal(SigNum.SEND_FILE_COMPLETED));
+			fromWorkers.get(i).readObject(); //SESSION_ENDED
 			toWorkers.get(i).close();
 			fromWorkers.get(i).close();
 		}
@@ -115,50 +109,64 @@ public class JobClient {
 			long remainingBytes = sourceSize % numSplits;
 			//loop through splits
 			for (int destIx = 1; destIx <= numSplits; destIx++) {
-				System.out.println("Sending split " + destIx + " to worker " + ptr);
-				ObjectOutputStream oos = toWorkers.get(ptr);
-				ObjectInputStream ois = fromWorkers.get(ptr);
+ 				System.out.println("Sending split: " + destIx);
+ 				ObjectOutputStream oos = toWorkers.get(ptr);
+ 				ObjectInputStream ois = fromWorkers.get(ptr);
 				oos.writeObject(new Signal(SigNum.SEND_SPLIT));
-				oos.writeObject(file.getName()+destIx);
-				long n = bytesPerSplit;
-				while (n > 0) {
-					long bytesToWrite = Math.min(n, maxReadBufferSize);
-					int bytesWritten = readWrite(inputFile, oos, bytesToWrite);
-					if (bytesWritten == -1)
-						break;
-					n -= bytesWritten;
-				}
-				System.out.println("wait reading signal");
-				Object obj = ois.readObject();
-				if (obj instanceof Signal) {
-					Signal sig = (Signal)obj;
-					if (sig.getSignal() != SigNum.SPLIT_RECEIVED) {
-						System.err.println("Unexpected signal received: " + sig.getSignal());
-					}
-				} else {
-					System.err.println("Unexpected object received.");
-				}
+ 				oos.writeObject(file.getName()+destIx);
+ 				if (bytesPerSplit > maxReadBufferSize) {
+ 					long numReads = bytesPerSplit / maxReadBufferSize;
+ 					long numRemainingRead = bytesPerSplit % maxReadBufferSize;
+ 					for (int i = 0; i < numReads; i++) {
+ 						readWrite(inputFile, oos, maxReadBufferSize);
+ 					}
+ 					if (numRemainingRead > 0) {
+ 						readWrite(inputFile, oos, numRemainingRead);
+ 					}
+ 				} else {
+ 					readWrite(inputFile, oos, bytesPerSplit);
+ 				}
+				oos.writeObject(new Signal(SigNum.SEND_SPLIT_COMPLETED));
+ 				Object obj = ois.readObject();
+ 				if(obj instanceof Signal) {
+ 					Signal sig = (Signal)obj;
+ 					if(sig.getSignal() != SigNum.SPLIT_RECEIVED) {
+ 						System.err.println("wrong signal");
+ 					}
+ 				} else {
+ 					System.err.println("wrong object");
+ 				}
 				ptr = (ptr+1) % numOfWorker; //TODO
-			}
-			if (remainingBytes > 0) {
-				System.out.println("Sending split " + (numSplits+1) + " to worker " + ptr);
-				ObjectOutputStream oos = toWorkers.get(ptr);
+ 			}
+ 			if (remainingBytes > 0) {
+ 				ObjectOutputStream oos = toWorkers.get(ptr);
+ 				ObjectInputStream ois = fromWorkers.get(ptr);
 				oos.writeObject(new Signal(SigNum.SEND_SPLIT));
-				oos.writeObject(file.getName()+(numSplits+1));
-				readWrite(inputFile, oos, remainingBytes);
+ 				oos.writeObject(file.getName()+(numSplits+1));
+ 				readWrite(inputFile, oos, remainingBytes);
+				oos.writeObject(new Signal(SigNum.SEND_SPLIT_COMPLETED));
+				Object obj = ois.readObject();
+ 				if(obj instanceof Signal) {
+ 					Signal sig = (Signal)obj;
+ 					if(sig.getSignal() != SigNum.SPLIT_RECEIVED) {
+ 						System.err.println("wrong signal");
+ 					}
+ 				} else {
+ 					System.err.println("wrong object");
+ 				}
 				ptr = (ptr+1) % numOfWorker;
-			}
+ 			}
 			
 			inputFile.close();
 		}
 	}
 
-	private int readWrite(RandomAccessFile raf, ObjectOutputStream oos, long numBytes) throws IOException {
-		byte[] buf = new byte[(int) numBytes];
-		int bytesWritten = raf.read(buf);
-		oos.writeObject(new Integer(bytesWritten));
-		if (bytesWritten != -1)
-			oos.writeObject(buf);
-		return bytesWritten;
-	}
+	private void readWrite(RandomAccessFile raf, ObjectOutputStream oos, long numBytes) throws IOException {
+ 		byte[] buf = new byte[(int) numBytes];
+ 		int bytesRead = raf.read(buf);
+ 		if (bytesRead != -1) {
+ 			oos.writeObject(new Integer(bytesRead));
+ 			oos.writeObject(buf);
+ 		}
+ 	}
 }
