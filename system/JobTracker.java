@@ -130,22 +130,26 @@ public class JobTracker extends Thread {
 //                	System.out.println("Doing reduce next...");
                     if (hasReduceJob()) {
                         ReduceJob job = getCurrentReduceJob();
-                        if (job.hasNextIdlePartition()) {
-                            int idx = job.nextIdlePartitionIdx();
-                            ReducePartition partition = job.getPartition(idx);
-                            for (WorkerHandler wh : workerHandlerList)
+                        ReducePartition[] partitions = job.getPartitions();
+                        for (int i = 0; i < partitions.length; i++) {
+                        	ReducePartition partition = partitions[i];
+                        	if (partition.getJobState() != JobState.IDLE)
+                        		continue;
+                        	System.out.println("Found idle reduce partition: JobID = " + job.getID() + ", PartitionIdx = " + i);
+                        	for (WorkerHandler wh : workerHandlerList)
                                 if (wh.isIdle()) { // Found idle worker
                                 	System.out.println("Initiating reduce operation...");
-                                    done = initReduce(wh, partition, job.getID(), idx);
+                                    done = initReduce(wh, partition, job.getID(), i);
                                     if (done) {
                                     	System.out.println("Worker (" + wh.getSocket().getInetAddress() +
-                                    			") assigned for reduce operation: JobID = " + job.getID() + ", PartitionId = " + idx);
-                                    	job.decNumIdle();
+                                    			") assigned for reduce operation: JobID = " + job.getID() + ", PartitionId = " + i);
                                     	break;
                                     }
                                     else
                                     	System.out.println("Reduce operation initiation failed.");
                                 }
+                        	if (done)
+                                break;
                         }
                     }
                 }

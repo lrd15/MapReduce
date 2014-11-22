@@ -68,6 +68,7 @@ public class WorkerHandler extends Thread {
                             else
                             	System.out.println("Worker (" + getSocket().getInetAddress() + ") failed to become idle.");
                             split.setIntermediateFilenames(filenames);
+                            System.out.println("First intermediate filename for MapJob #" + jobID + ": " + master.getMapJob(jobID).getSplit(idx).getIntermediateFilename(0));
                             mapJob.incNumCompleted();
                             if (mapJob.isCompleted())
                                 master.migrate(mapJob);
