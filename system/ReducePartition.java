@@ -16,12 +16,8 @@ public class ReducePartition implements Serializable {
     public ReducePartition(InetAddress[] ips, String[] files, int workerID) {
         this.workerID = workerID;
         state = JobState.IDLE;
-        mapperAddresses = new InetAddress[ips.length];
-        for (int i = 0; i < ips.length; i++)
-            mapperAddresses[i] = ips[i];
-        filenames = new String[files.length];
-        for (int i = 0; i < files.length; i++)
-            filenames[i] = files[i];
+        mapperAddresses = ips;
+        filenames = files;
     }
 
     public ReducePartition(ReducePartition p) {
