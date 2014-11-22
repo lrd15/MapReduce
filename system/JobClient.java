@@ -8,6 +8,8 @@ import java.io.RandomAccessFile;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
+
 import lib.input.InputFormat;
 import lib.input.InputSplit;
 import config.Configuration;
@@ -57,7 +59,7 @@ public class JobClient {
 		toMaster.writeObject(inputSplits);
 	}
 
-	private void sendFilesToWorkers() throws IOException  {
+	private void sendFilesToWorkers() throws IOException, ClassNotFoundException  {
 		System.out.println("JobClient sending files to workers");
 		ArrayList<ObjectOutputStream> toWorkers = new ArrayList<ObjectOutputStream>();
 		ArrayList<ObjectInputStream> fromWorkers = new ArrayList<ObjectInputStream>();
@@ -97,7 +99,7 @@ public class JobClient {
 	}
 
 	private void splitAndSend(File[] files, ArrayList<ObjectOutputStream> toWorkers,
-										    ArrayList<ObjectInputStream> fromWorkers) throws IOException {
+										    ArrayList<ObjectInputStream> fromWorkers) throws IOException, ClassNotFoundException {
 		int ptr = 0;
 		int numOfWorker = toWorkers.size();
 		long numSplits = Configuration.NUM_OF_SPLITS;
@@ -115,6 +117,7 @@ public class JobClient {
 			for (int destIx = 1; destIx <= numSplits; destIx++) {
 				System.out.println("Sending split " + destIx + " to worker " + ptr);
 				ObjectOutputStream oos = toWorkers.get(ptr);
+				ObjectInputStream ois = fromWorkers.get(ptr);
 				oos.writeObject(new Signal(SigNum.SEND_SPLIT));
 				oos.writeObject(file.getName()+destIx);
 				long n = bytesPerSplit;
@@ -124,6 +127,15 @@ public class JobClient {
 					if (bytesWritten == -1)
 						break;
 					n -= bytesWritten;
+				}
+				Object obj = ois.readObject();
+				if (obj instanceof Signal) {
+					Signal sig = (Signal)obj;
+					if (sig.getSignal() != SigNum.SPLIT_RECEIVED) {
+						System.err.println("Unexpected signal received: " + sig.getSignal());
+					}
+				} else {
+					System.err.println("Unexpected object received.");
 				}
 				ptr = (ptr+1) % numOfWorker; //TODO
 			}
