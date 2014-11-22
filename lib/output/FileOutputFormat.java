@@ -8,7 +8,6 @@ import config.Job;
 
 public class FileOutputFormat extends OutputFormat<String, String> {
 
-	//TODO
 	private static int index = 1;
 	
 	@Override

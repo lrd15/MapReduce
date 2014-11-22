@@ -18,7 +18,7 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 	private TreeMap<KEYOUT, VALUEOUT> output;
 	private RecordReader<KEYIN, VALUEIN> reader;
 	private Partitioner<KEYOUT, VALUEOUT> partitioner;
-	private InputSplit inputSplit;
+//	private InputSplit inputSplit;
 	
 	private static int id = 0;
 
@@ -29,7 +29,7 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
     				  Partitioner<KEYOUT, VALUEOUT> partitioner) {
     	this.jobContext = jobContext;
     	this.reader = reader;
-    	this.inputSplit = inputSplit;
+//    	this.inputSplit = inputSplit;
     	this.partitioner = partitioner;
     	this.output = new TreeMap<KEYOUT, VALUEOUT>();
     	id++;
@@ -47,9 +47,9 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
     	return this.reader.nextKeyValue();
     }
     
-    public InputSplit getInputSplit() {
-    	return this.inputSplit;
-    }
+//    public InputSplit getInputSplit() {
+//    	return this.inputSplit;
+//    }
     
     public void write(KEYOUT key, VALUEOUT value) throws IOException {
     	this.output.put(key, value);
