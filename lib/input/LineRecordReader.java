@@ -18,7 +18,8 @@ public class LineRecordReader extends RecordReader<String, String> {
 	
 	public LineRecordReader(String path, InputSplit split) throws IOException {
 		FileInputSplit fis = (FileInputSplit)split;
-		this.file = new RandomAccessFile(new File(path+File.separator+fis.getFilename()), "r");
+		File fileToRead = new File(path + File.separator + fis.getFilename());
+		this.file = new RandomAccessFile(fileToRead, "r");
 		
 		long start = fis.getStart();
 		file.seek(start);
@@ -27,8 +28,8 @@ public class LineRecordReader extends RecordReader<String, String> {
 		readWholeFile = false;
 	}
 	
-	public LineRecordReader(File filename) throws IOException {
-		this.file = new RandomAccessFile(filename, "r");
+	public LineRecordReader(String fileAbsolutePath) throws IOException {
+		this.file = new RandomAccessFile(new File(fileAbsolutePath), "r");
 		file.seek(0);
 		readWholeFile = true;
 	}

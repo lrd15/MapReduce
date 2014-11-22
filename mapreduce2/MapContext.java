@@ -48,7 +48,6 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT extends Comparable<KEYOUT>, VALUE
 	}
     
     public void close() throws IOException {
-    	System.out.println("total: "+output.size());
     	int numOfReducer = Configuration.NUM_OF_REDUCERS;
     	RecordWriter[] partitionWriters = new RecordWriter[numOfReducer];
     	for(int i=0; i<numOfReducer; i++) {

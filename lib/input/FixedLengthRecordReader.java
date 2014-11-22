@@ -18,7 +18,7 @@ public class FixedLengthRecordReader extends RecordReader<Long, String> {
 	
 	public FixedLengthRecordReader(String path, InputSplit split, int recordSize) throws IOException {
 		FileInputSplit fis = (FileInputSplit)split;
-		File fileToRead = new File(path+File.separator+fis.getFilename());
+		File fileToRead = new File(path + File.separator + fis.getFilename());
 		this.file = new RandomAccessFile(fileToRead, "r");
 		long start = fis.getStart();
 		file.seek(start);
@@ -47,12 +47,10 @@ public class FixedLengthRecordReader extends RecordReader<Long, String> {
 	}
 	
 	public Long getCurrentKey() {
-		System.out.println("CurrentKey: " + this.key);
 		return this.key;
 	}
 	
 	public String getCurrentValue() {
-		System.out.println("CurrentValue: " + this.value);
 		return this.value;
 	}
 		
