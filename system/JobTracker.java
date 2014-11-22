@@ -135,7 +135,7 @@ public class JobTracker extends Thread {
                         	ReducePartition partition = partitions[i];
                         	if (partition.getJobState() != JobState.IDLE)
                         		continue;
-                        	System.out.println("Found idle reduce partition: JobID = " + job.getID() + ", PartitionIdx = " + i);
+//                        	System.out.println("Found idle reduce partition: JobID = " + job.getID() + ", PartitionIdx = " + i);
                         	for (WorkerHandler wh : workerHandlerList)
                                 if (wh.isIdle()) { // Found idle worker
                                 	System.out.println("Initiating reduce operation...");

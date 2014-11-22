@@ -143,7 +143,9 @@ public class TaskTracker extends Thread {
 			InputFormat inputFormat = (InputFormat) job.getInputFormatClass().newInstance();
 			Partitioner partitioner = (Partitioner) job.getPartitionerClass().newInstance();
 			RecordReader<Long, String> reader = inputFormat.getRecordReader(job, JobTracker.MAPIN_DIR, inputSplit);
-			filenames = inputFormat.getFilenames();
+			String[] intermediateFiles = inputFormat.getFilenames();
+			for (int i = 0; i < filenames.length; i++)
+				filenames[i] = intermediateFiles[i];
 			MapContext mapContext = new MapContext<Long, String, String, String>(job, reader, partitioner);
 			Mapper mapper = (Mapper) job.getMapperClass().newInstance();
 			mapper.run(mapContext);
