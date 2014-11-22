@@ -16,6 +16,7 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT extends Comparable<KEYOUT>, VALUE
 
 	private JobContext jobContext;
 	private List<KeyValuePair> output;
+	private String[] outputFilenames;
 	private RecordReader<KEYIN, VALUEIN> reader;
 	private Partitioner<KEYOUT, VALUEOUT> partitioner;
 	
@@ -28,6 +29,7 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT extends Comparable<KEYOUT>, VALUE
     	this.reader = reader;
     	this.partitioner = partitioner;
     	this.output = new ArrayList<KeyValuePair>();
+    	this.outputFilenames = new String[Configuration.NUM_OF_REDUCERS];
     	instanceID++;
     }
     
@@ -47,12 +49,16 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT extends Comparable<KEYOUT>, VALUE
     	this.output.add(new KeyValuePair(key, value));
 	}
     
+    public String[] getFilenames() {
+    	return this.outputFilenames;
+    }
+    
     public void close() throws IOException {
     	int numOfReducer = Configuration.NUM_OF_REDUCERS;
     	RecordWriter[] partitionWriters = new RecordWriter[numOfReducer];
     	for(int i=0; i<numOfReducer; i++) {
-    		String filename = filenameGenerator(i);
-    		partitionWriters[i] = new FileRecordWriter(new File("mapout"), filename);
+    		this.outputFilenames[i] = filenameGenerator(i);
+    		partitionWriters[i] = new FileRecordWriter(new File("mapout"), this.outputFilenames[i]);
     	}
     	Collections.sort(this.output);
     	for(KeyValuePair pair : this.output) {
