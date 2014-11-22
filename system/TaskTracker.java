@@ -144,7 +144,7 @@ public class TaskTracker extends Thread {
 			InputFormat inputFormat = (InputFormat) job.getInputFormatClass().newInstance();
 			Partitioner partitioner = (Partitioner) job.getPartitionerClass().newInstance();
 			RecordReader<Long, String> reader = inputFormat.getRecordReader(job, JobTracker.MAPIN_DIR, inputSplit);
-			String identifier = job.getID() + "_" + splitIdx;
+			String identifier = job.getJobIdentifier() + job.getID() + "_" + splitIdx;
 			MapContext mapContext = new MapContext<Long, String, String, String>(job, identifier, reader, partitioner);
 			Mapper mapper = (Mapper) job.getMapperClass().newInstance();
 			mapper.run(mapContext);
