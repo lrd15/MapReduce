@@ -272,26 +272,30 @@ public class JobTracker extends Thread {
         ReducePartition[] partitions = new ReducePartition[Configuration.NUM_OF_REDUCERS];
         for (int i = 0; i < Configuration.NUM_OF_REDUCERS; i++) {
             // Partition i
-            ArrayList<Integer> mapperIDList = new ArrayList<Integer>();
+            ArrayList<InetAddress> mapperIPList = new ArrayList<InetAddress>();
             ArrayList<String> filenameList = new ArrayList<String>();
             for (MapJobSplit split : splits) {
                 String filename = split.getIntermediateFilename(i);
                 if (filename != null) {
-                    mapperIDList.add(split.getWorkerID());
+                    mapperIPList.add(getWorkerAddressByID(split.getWorkerID()));
                     filenameList.add(filename);
                 }
             }
-            Integer[] mIDs = mapperIDList.toArray(new Integer[mapperIDList.size()]);
-            int[] mapperIDs = new int[mIDs.length];
-            for (int j = 0; j < mapperIDs.length; j++)
-                mapperIDs[j] = mIDs[j];
-            partitions[i] = new ReducePartition(mapperIDs,
+            InetAddress[] mapperIPs = mapperIPList.toArray(new InetAddress[mapperIPList.size()]);
+            partitions[i] = new ReducePartition(mapperIPs,
                 filenameList.toArray(new String[filenameList.size()]));
         }
         ReduceJob reduceJob = new ReduceJob(mapJob.getID(), partitions);
         removeMapJob(mapJob);
         addReduceJob(reduceJob);
         System.out.println("Map job " + mapJob.getID() + "migrated to reduce job list.");
+    }
+    
+    private InetAddress getWorkerAddressByID(int workerID) {
+    	for (WorkerHandler wh : workerHandlerList)
+    		if (wh.getID() == workerID)
+    			return wh.getSocket().getInetAddress();
+    	return null;
     }
 
     synchronized private void advanceMapIdx() {
@@ -347,15 +351,6 @@ public class JobTracker extends Thread {
         return null;
     }
     
-    public Host getWorkerHostByWorkerID(int workerID) {
-    	for (WorkerHandler wh : workerHandlerList)
-    		if (wh.getID() == workerID)
-    			for (Host host : Configuration.WORKERS)
-    				if (host.getIPAddress().getHostAddress().equals(wh.getSocket().getInetAddress().getHostAddress()))
-    					return host;
-    	return null;
-    }
-
     private JobTracker getThis() {
 //    	System.out.println("getThis(): " + this.hashCode());
         return this;

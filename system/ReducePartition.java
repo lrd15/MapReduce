@@ -1,34 +1,35 @@
 package system;
 
 import java.io.Serializable;
+import java.net.InetAddress;
 
 public class ReducePartition implements Serializable {
-    private int[] mapperIDs;
+    private InetAddress[] mapperAddresses;
     private String[] filenames;
     private JobState state;
     int workerID;
 
-    public ReducePartition(int[] ids, String[] files) {
-        this(ids, files, -1);
+    public ReducePartition(InetAddress[] ips, String[] files) {
+        this(ips, files, -1);
     }
 
-    public ReducePartition(int[] ids, String[] files, int workerID) {
+    public ReducePartition(InetAddress[] ips, String[] files, int workerID) {
         this.workerID = workerID;
         state = JobState.IDLE;
-        mapperIDs = new int[ids.length];
-        for (int i = 0; i < ids.length; i++)
-            mapperIDs[i] = ids[i];
+        mapperAddresses = new InetAddress[ips.length];
+        for (int i = 0; i < ips.length; i++)
+            mapperAddresses[i] = ips[i];
         filenames = new String[files.length];
         for (int i = 0; i < files.length; i++)
             filenames[i] = files[i];
     }
 
     public ReducePartition(ReducePartition p) {
-        this(p.getMapperIDs(), p.getFilenames());
+        this(p.getMapperAddresses(), p.getFilenames());
     }
 
-    public int[] getMapperIDs() {
-        return mapperIDs;
+    public InetAddress[] getMapperAddresses() {
+        return mapperAddresses;
     }
 
     public String[] getFilenames() {

@@ -12,13 +12,14 @@ public class TaskTrackerWorkerHandler extends Thread {
     private ObjectOutputStream toWorker;
 
     private boolean running;
+    private TaskTracker taskTracker;
 
-    public TaskTrackerWorkerHandler(int id, Socket socket) throws IOException {
+    public TaskTrackerWorkerHandler(TaskTracker taskTracker, int id, Socket socket) throws IOException {
         this.id = id;
         this.socket = socket;
         running = true;
         this.socket = socket;
-        
+        this.taskTracker = taskTracker;
     }
 
     @Override
@@ -46,7 +47,9 @@ public class TaskTrackerWorkerHandler extends Thread {
 		                					toWorker.writeObject(buffer);
 		                				}
 		                			}
+		                			fis.close();
 		                			toWorker.writeObject(new Signal(SigNum.SEND_SPLIT_COMPLETED));
+		                			running = false;
 		                		} catch (FileNotFoundException e) {
 		                			e.printStackTrace();
 		                			toWorker.writeObject(new Signal(SigNum.FILE_NOT_FOUND));
@@ -66,6 +69,7 @@ public class TaskTrackerWorkerHandler extends Thread {
                     }
 				}
 			}
+			taskTracker.removeWorkerHandler(this);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

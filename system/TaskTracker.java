@@ -2,6 +2,7 @@ package system;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -146,8 +147,11 @@ public class TaskTracker extends Thread {
 
 	// Return true if successful
 	private boolean doReduce(Job job, ReducePartition partition) {
-		int[] mapperIDs = partition.getMapperIDs();
+		InetAddress[] mapperAddresses = partition.getMapperAddresses();
 		String[] filenames = partition.getFilenames();
+		
+		if (!getFiles(mapperAddresses, filenames))
+	        return false;
 
 		// TODO
 		try {
@@ -175,6 +179,104 @@ public class TaskTracker extends Thread {
 			return false;
 		}
 		return true;
+	}
+	
+	private boolean getFiles(InetAddress[] mapperIPs, String[] filenames) {
+		int n = mapperIPs.length;
+	    if (n == 0) {
+	        System.out.println("No intermediate files for reducer.");
+	        return false;
+	    }
+	    boolean[] completed = new boolean[n];
+	    int numCompleted = 0;
+	    int cur = 0;
+	    while (numCompleted < n) {
+	        if (!completed[cur]) {
+	            try {
+	                Host host = getHostByAddress(mapperIPs[cur]);
+	                Socket socket = new Socket(host.getIPAddress(), host.getPortForWorker());
+	                ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+	                oos.writeObject(new Signal(SigNum.RETRIEVE_FILE));
+	                oos.writeObject(filenames[cur]);
+	                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+	                Object obj = ois.readObject();
+	                if (obj instanceof Signal) {
+	                    Signal sig = (Signal)obj;
+	                    if (sig.getSignal() == SigNum.SEND_SPLIT) {
+	                        try {
+	                            FileOutputStream fos = new FileOutputStream(new File(JobTracker.REDUCEIN_DIR + File.separator + filenames[cur]));
+	                            while (true) {
+	                                Object subObj = ois.readObject();
+	                                if (subObj instanceof Integer) {
+	                                    int bytesRead = (Integer)subObj;
+	                                    byte[] buffer = (byte[])ois.readObject();
+	                                    System.out.println("Bytes received: " + bytesRead);
+
+	                                    if (fos == null) {
+	                                        System.out.println("FileOutputStream is null pointer.");
+	                                        return false;
+	                                    }
+	                                    
+	                                    // Write bytes to file
+	                                    fos.write(buffer, 0, bytesRead);
+	                                }
+	                                else {
+	                                    if (subObj instanceof Signal) {
+	                                        if (((Signal)subObj).getSignal() == SigNum.SEND_SPLIT_COMPLETED) {
+	                                            fos.close();
+	                                            completed[cur] = true;
+	                                            numCompleted++;
+	                                            break;
+	                                        }
+	                                        else {
+	                                            System.out.println("Unexpected signal received: " + ((Signal)subObj).getSignal());
+	                                            return false;
+	                                        }
+	                                    }
+	                                    else {
+	                                        System.out.println("Unexpected object received.");
+	                                        return false;
+	                                    }
+	                                }
+	                            }
+	                        } catch (FileNotFoundException e) {
+	                            System.out.println("File Not Found: " + filenames[cur]);
+	                            return false;
+	                        }
+	                    }
+	                    else {
+	                        System.out.println("Unexpected signal received: " + sig.getSignal());
+	                        return false;
+	                    }
+	                }
+	                socket.close();
+	                cur = (cur + 1) % n;
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	                // Worker failure
+	            }
+	        }
+	    }
+	    return true;
+	}
+	
+	private Host getHostByAddress(InetAddress addr) {
+		for (Host host : Configuration.WORKERS)
+			if (host.getIPAddress().getHostAddress().equals(addr.getHostAddress()))
+				return host;
+		return null;
+	}
+	
+	synchronized public void removeWorkerHandler(TaskTrackerWorkerHandler wh) {
+    	workerHandlerList.remove(wh);
+    }
+    
+    synchronized public void removeClientHandler(TaskTrackerClientHandler ch) {
+    	clientHandlerList.remove(ch);
+    }
+	
+	private TaskTracker getThis() {
+		return this;
 	}
 
 	// Periodically send heartbeat to job tracker
@@ -206,7 +308,7 @@ public class TaskTracker extends Thread {
 				try {
 					socket = clientServerSocket.accept();
 					TaskTrackerClientHandler clientHandler = new TaskTrackerClientHandler(
-							nextClientID++, socket);
+							getThis(), nextClientID++, socket);
 					clientHandlerList.add(clientHandler);
 					clientHandler.start();
 					System.out.println("New client connected: "
@@ -228,7 +330,7 @@ public class TaskTracker extends Thread {
 				try {
 					socket = workerServerSocket.accept();
 					TaskTrackerWorkerHandler workerHandler = new TaskTrackerWorkerHandler(
-							nextWorkerID++, socket);
+							getThis(), nextWorkerID++, socket);
 					workerHandlerList.add(workerHandler);
 					workerHandler.start();
 					System.out.println("New worker connected: "

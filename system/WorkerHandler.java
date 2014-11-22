@@ -89,7 +89,8 @@ public class WorkerHandler extends Thread {
                         	break;
                     }
                 }
-            } 
+            }
+			master.removeWorkerHandler(this);
 		} catch (SocketException e) {
 			e.printStackTrace();
 			System.out.println("Worker (" + socket.getInetAddress() + ") failed.");
