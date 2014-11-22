@@ -14,23 +14,23 @@ import config.JobContext;
 
 public class MapContext<KEYIN, VALUEIN, KEYOUT extends Comparable<KEYOUT>, VALUEOUT> {
 
-	private JobContext jobContext;
 	private List<KeyValuePair> output;
 	private String[] outputFilenames;
+	
 	private RecordReader<KEYIN, VALUEIN> reader;
 	private Partitioner<KEYOUT, VALUEOUT> partitioner;
 	
-	private static int instanceID = 0;
-
+	private String instanceID;
+	
     public MapContext(JobContext jobContext,
+    				  String instanceID,
     				  RecordReader<KEYIN,VALUEIN> reader, 
     				  Partitioner<KEYOUT, VALUEOUT> partitioner) {
-    	this.jobContext = jobContext;
     	this.reader = reader;
     	this.partitioner = partitioner;
     	this.output = new ArrayList<KeyValuePair>();
     	this.outputFilenames = new String[Configuration.NUM_OF_REDUCERS];
-    	instanceID++;
+    	this.instanceID = instanceID;
     }
     
     public KEYIN getCurrentKey() throws IOException {
@@ -74,7 +74,7 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT extends Comparable<KEYOUT>, VALUE
 	}
     
     private String filenameGenerator(int reducerID) {
-    	return "/" + jobContext.getJobIdentifier() + instanceID + "_" + reducerID;
+    	return "/" + instanceID + "_" + reducerID;
     }
    
     private class KeyValuePair implements Comparable<KeyValuePair>{
