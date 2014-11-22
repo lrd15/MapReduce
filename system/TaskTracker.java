@@ -1,15 +1,30 @@
 package system;
 
-import java.io.*;
-import java.util.ArrayList;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
-import lib.input.*;
-import lib.output.*;
-import mapreduce2.*;
-import config.*;
+import lib.input.InputFormat;
+import lib.input.InputSplit;
+import lib.input.LineRecordReader;
+import lib.input.RecordReader;
+import lib.output.OutputFormat;
+import lib.output.RecordWriter;
+import mapreduce2.MapContext;
+import mapreduce2.Mapper;
+import mapreduce2.Partitioner;
+import mapreduce2.ReduceContext;
+import mapreduce2.Reducer;
+import mapreduce2.StringStringIterator;
+import config.Configuration;
+import config.Job;
 
 public class TaskTracker extends Thread {
 	private ArrayList<TaskTrackerWorkerHandler> workerHandlerList;
