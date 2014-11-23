@@ -37,8 +37,9 @@ public class TaskTrackerClientHandler extends Thread {
                     		System.out.println("Receiving input split...");
                     		String filename = (String)fromClient.readObject();
                     		System.out.println("Received filename: " + filename);
-                    		FileOutputStream fos = new FileOutputStream(
-                    				new File(JobTracker.MAPIN_DIR + File.separator + filename));
+                    		File file = new File(JobTracker.MAPIN_DIR + File.separator + filename);
+                    		file.deleteOnExit();
+                    		FileOutputStream fos = new FileOutputStream(file);
                     		while (true) {
                     			Object subObj = fromClient.readObject();
                     			if (subObj instanceof Integer) {

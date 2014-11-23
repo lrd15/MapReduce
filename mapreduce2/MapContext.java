@@ -57,6 +57,7 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT extends Comparable<KEYOUT>, VALUE
     	for(int i=0; i<numOfReducer; i++) {
     		this.outputFilenames[i] = filenameGenerator(i);
     		partitionWriters[i] = new FileRecordWriter(new File("mapout"), this.outputFilenames[i]);
+    		new File("mapout" + this.outputFilenames[i]).deleteOnExit();
     	}
     	Collections.sort(this.output);
     	for(KeyValuePair pair : this.output) {

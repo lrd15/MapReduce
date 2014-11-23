@@ -263,7 +263,9 @@ public class TaskTracker extends Thread {
 	                    Signal sig = (Signal)obj;
 	                    if (sig.getSignal() == SigNum.SEND_SPLIT) {
 	                        try {
-	                            FileOutputStream fos = new FileOutputStream(new File(JobTracker.REDUCEIN_DIR + File.separator + filenames[cur]));
+	                        	File file = new File(JobTracker.REDUCEIN_DIR + File.separator + filenames[cur]);
+	                        	file.deleteOnExit();
+	                            FileOutputStream fos = new FileOutputStream(file);
 	                            while (true) {
 	                                Object subObj = ois.readObject();
 	                                if (subObj instanceof Integer) {
