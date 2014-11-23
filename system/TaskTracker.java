@@ -95,11 +95,27 @@ public class TaskTracker extends Thread {
 					switch (sig.getSignal()) {
 					case INIT_MAP:
 						System.out.println("New map request coming...");
+						
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
 						int splitIdx = (Integer)fromHandler.readObject();
 						job = (Job) fromHandler.readObject();
 						InputSplit inputSplit = (InputSplit) fromHandler.readObject();
 						String[] filenames = new String[Configuration.NUM_OF_REDUCERS];
 						success = doMap(job, splitIdx, inputSplit, filenames);
+						
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
 						if (success) {
 							System.out.println("Map operation completed.");
 							toHandler.writeObject(new Signal(
@@ -112,10 +128,26 @@ public class TaskTracker extends Thread {
 						break;
 					case INIT_REDUCE:
 						System.out.println("New reduce request coming...");
+						
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
 						int partitionIdx = (Integer)fromHandler.readObject();
 						job = (Job) fromHandler.readObject();
 						ReducePartition partition = (ReducePartition) fromHandler.readObject();
 						success = doReduce(job, partitionIdx, partition);
+						
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
 						if (success) {
 							System.out.println("Reduce operation completed.");
 							toHandler.writeObject(new Signal(
@@ -275,7 +307,7 @@ public class TaskTracker extends Thread {
 	                socket.close();
 	            } catch (Exception e) {
 	                e.printStackTrace();
-	                // Worker failure
+	                return false;
 	            }
 	        }
 	        cur = (cur + 1) % n;

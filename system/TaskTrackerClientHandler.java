@@ -44,7 +44,7 @@ public class TaskTrackerClientHandler extends Thread {
                     			if (subObj instanceof Integer) {
                 					int bytesRead = (Integer)subObj;
                 					byte[] buffer = (byte[])fromClient.readObject();
-                					System.out.println("Bytes received: " + bytesRead);
+//                					System.out.println("Bytes received: " + bytesRead);
 
                 					if (fos == null)
                 						System.out.println("FileOutputStream is null pointer.");

@@ -60,15 +60,15 @@ public class WorkerHandler extends Thread {
                         case MAP_COMPLETED:
                         	System.out.println("Received MAP_COMPLETED signal.");
                             String[] filenames = (String[])fromWorker.readObject();
-                            System.out.println("Received " + filenames.length + " intermediate files.");
+//                            System.out.println("Received " + filenames.length + " intermediate files.");
                             mapJob = master.getMapJob(jobID);
                             split = mapJob.getSplit(idx);
                             split.setJobState(JobState.COMPLETED);
                             setWorkerState(WorkerState.IDLE);
-                            if (isIdle())
-                            	System.out.println("Worker (" + getSocket().getInetAddress() + ") now idle.");
-                            else
-                            	System.out.println("Worker (" + getSocket().getInetAddress() + ") failed to become idle.");
+//                            if (isIdle())
+//                            	System.out.println("Worker (" + getSocket().getInetAddress() + ") now idle.");
+//                            else
+//                            	System.out.println("Worker (" + getSocket().getInetAddress() + ") failed to become idle.");
                             split.setIntermediateFilenames(filenames);
 //                            System.out.println("Filename0: " + split.getIntermediateFilename(0));
 //                            System.out.println("First intermediate filename for MapJob #" + jobID + ": " + master.getMapJob(jobID).getSplit(idx).getIntermediateFilename(0));
@@ -106,18 +106,7 @@ public class WorkerHandler extends Thread {
                     }
                 }
             }
-		} catch (SocketException e) {
-			e.printStackTrace();
-			System.out.println("Worker (" + socket.getInetAddress() + ") failed.");
-			alive = false;
-            running = false;
-		} catch (SocketTimeoutException e) { // Timeout -> tracker dies
-            alive = false;
-            running = false;
-            master.killWorkerHandler(this);
-        } catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			alive = false;
 			running = false;

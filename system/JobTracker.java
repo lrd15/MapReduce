@@ -99,13 +99,13 @@ public class JobTracker extends Thread {
                             MapJobSplit split = splits[i];
                             if (split.getJobState() != JobState.IDLE)
                                 continue;
-                            System.out.println("Found idle map job split: JobID = " + job.getID() + ", SplitId = " + i);
+//                            System.out.println("Found idle map job split: JobID = " + job.getID() + ", SplitId = " + i);
 							try {
 								Host[] hosts = split.getInputSplit().getLocations();
 								for (Host host : hosts) {
-									System.out.println("Trying host (" + host.getIPAddress().getHostAddress() + ")...");
+//									System.out.println("Trying host (" + host.getIPAddress().getHostAddress() + ")...");
                                     WorkerHandler wh = getWorkerHandlerByHost(host);
-                                    System.out.println("WorkerHandler (" + wh.getSocket().getInetAddress() + ") is " + wh.getWorkerState());
+//                                    System.out.println("WorkerHandler (" + wh.getSocket().getInetAddress() + ") is " + wh.getWorkerState());
                                     if (wh != null && wh.isIdle()) { // Found idle worker
                                     	System.out.println("Initiating map operation...");
                                         done = initMap(wh, split, job.getID(), i);
@@ -310,7 +310,7 @@ public class JobTracker extends Thread {
     	removeReduceJob(jobID);
     }
     
-    private InetAddress getWorkerAddressByID(int workerID) {
+    synchronized private InetAddress getWorkerAddressByID(int workerID) {
     	for (WorkerHandler wh : workerHandlerList)
     		if (wh.getID() == workerID)
     			return wh.getSocket().getInetAddress();
@@ -359,7 +359,7 @@ public class JobTracker extends Thread {
         shouldDoMap ^= true;
     }
 
-    private WorkerHandler getWorkerHandlerByHost(Host host) {
+    synchronized private WorkerHandler getWorkerHandlerByHost(Host host) {
 //    	System.out.println("Trying to get worker handler by host...");
 //    	System.out.println("Host ip: " + host.getIPAddress().getHostAddress());
         for (WorkerHandler wh : workerHandlerList) {
@@ -381,13 +381,18 @@ public class JobTracker extends Thread {
     	// no longer accessible
     	for (MapJob job : mapJobList)
     		for (MapJobSplit split : job.getSplits())
-    			if (split.getWorkerID() == wh.getID())
+    			if (split.getWorkerID() == wh.getID()) {
     				split.setJobState(JobState.IDLE);
+    				System.out.println("Reset MapJobSplit: JobID=" + job.getID());
+    			}
     	
     	for (ReduceJob job : reduceJobList)
     		for (ReducePartition partition : job.getPartitions())
-    			if (partition.getWorkerID() == wh.getID() && partition.getJobState() == JobState.IN_PROGRESS)
+    			if (partition.getWorkerID() == wh.getID() && partition.getJobState() == JobState.IN_PROGRESS) {
     				partition.setJobState(JobState.IDLE);
+    				System.out.println("Reset ReducePartition: JobID=" + job.getID());
+    			}
+    	removeWorkerHandler(wh);
     }
 
     // Check whether workers are alive
