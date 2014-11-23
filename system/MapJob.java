@@ -22,6 +22,10 @@ public class MapJob {
     public boolean isCompleted() {
         return numCompleted == jobSplits.length;
     }
+    
+    public void resetNumCompleted() {
+    	numCompleted = 0;
+    }
 
     synchronized public void incNumCompleted() {
         numCompleted++;

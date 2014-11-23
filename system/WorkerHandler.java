@@ -84,6 +84,7 @@ public class WorkerHandler extends Thread {
                             setWorkerState(WorkerState.IDLE);
                             reduceJob.incNumCompleted();
                             if (reduceJob.isCompleted()) {
+                            	master.removeMapJob(jobID);
                                 master.removeReduceJob(reduceJob);
                                 master.removeJob(reduceJob.getID());
                             }

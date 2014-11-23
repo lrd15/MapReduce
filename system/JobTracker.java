@@ -200,6 +200,12 @@ public class JobTracker extends Thread {
     	System.out.println("MapJob #" + job.getID() + " removed.");
     }
     
+    synchronized public void removeMapJob(int jobID) {
+    	for (int i = 0; i < mapJobList.size(); i++)
+    		if (mapJobList.get(i).getID() == jobID)
+    			mapJobList.remove(i--);
+    }
+    
     synchronized public void removeReduceJob(ReduceJob job) {
     	reduceJobList.remove(job);
     	System.out.println("ReduceJob #" + job.getID() + " removed.");
@@ -304,9 +310,11 @@ public class JobTracker extends Thread {
     
     synchronized public void fallback(int jobID) {
     	for (MapJob job : mapJobList)
-    		if (job.getID() == jobID)
+    		if (job.getID() == jobID) {
     			for (MapJobSplit split : job.getSplits())
     				split.setJobState(JobState.IDLE);
+    			job.resetNumCompleted();
+    		}
     	removeReduceJob(jobID);
     }
     
