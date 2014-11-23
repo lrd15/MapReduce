@@ -7,6 +7,8 @@ import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import lib.input.FileInputSplit;
 import lib.input.InputSplit;
@@ -96,6 +98,7 @@ public class JobClient {
 	private void splitAndSend(File[] files, ArrayList<ObjectOutputStream> toWorkers,
 										    ArrayList<ObjectInputStream> fromWorkers) throws IOException, ClassNotFoundException {
 		int ptr = 0;
+		int numOfDuplication = 3; //magic number
 		int numOfWorker = toWorkers.size();
 		int numSplits = Configuration.NUM_OF_SPLITS;
 		long maxReadBufferSize = 8 * 1024; //8KB
@@ -110,58 +113,71 @@ public class JobClient {
 			//loop through splits
 			for (int spl = 0; spl < numSplits; spl++) {
 				String splitFilename = job.getID() + "_" + spl + "_" + file.getName();
-				ObjectOutputStream oos = toWorkers.get(ptr);
- 				ObjectInputStream ois = fromWorkers.get(ptr);
-				oos.writeObject(new Signal(SigNum.SEND_SPLIT));
- 				oos.writeObject(splitFilename);
- 				if (bytesPerSplit > maxReadBufferSize) {
- 					long numReads = bytesPerSplit / maxReadBufferSize;
- 					long numRemainingRead = bytesPerSplit % maxReadBufferSize;
- 					for (int i = 0; i < numReads; i++) {
- 						readWrite(inputFile, oos, maxReadBufferSize);
- 					}
- 					if (numRemainingRead > 0) {
- 						readWrite(inputFile, oos, numRemainingRead);
- 					}
- 				} else {
- 					readWrite(inputFile, oos, bytesPerSplit);
- 				}
-				oos.writeObject(new Signal(SigNum.SEND_SPLIT_COMPLETED));
- 				Object obj = ois.readObject();
- 				if(obj instanceof Signal) {
- 					Signal sig = (Signal)obj;
- 					if(sig.getSignal() != SigNum.SPLIT_RECEIVED) {
- 						System.err.println("wrong signal");
- 					}
- 				} else {
- 					System.err.println("wrong object");
- 				}
- 				Host[] hosts = new Host[]{this.workerHosts.get(ptr)};
+				//create three duplications
+				Set<Integer> duplicationID = new HashSet<Integer>(); 
+				for(int dup = 0; dup < numOfDuplication; dup++) {
+					if(duplicationID.contains(ptr))
+						continue;
+					ObjectOutputStream oos = toWorkers.get(ptr);
+	 				ObjectInputStream ois = fromWorkers.get(ptr);
+					oos.writeObject(new Signal(SigNum.SEND_SPLIT));
+	 				oos.writeObject(splitFilename);
+	 				if (bytesPerSplit > maxReadBufferSize) {
+	 					long numReads = bytesPerSplit / maxReadBufferSize;
+	 					long numRemainingRead = bytesPerSplit % maxReadBufferSize;
+	 					for (int i = 0; i < numReads; i++) {
+	 						readWrite(inputFile, oos, maxReadBufferSize);
+	 					}
+	 					if (numRemainingRead > 0) {
+	 						readWrite(inputFile, oos, numRemainingRead);
+	 					}
+	 				} else {
+	 					readWrite(inputFile, oos, bytesPerSplit);
+	 				}
+					oos.writeObject(new Signal(SigNum.SEND_SPLIT_COMPLETED));
+	 				Object obj = ois.readObject();
+	 				if(obj instanceof Signal) {
+	 					Signal sig = (Signal)obj;
+	 					if(sig.getSignal() != SigNum.SPLIT_RECEIVED) {
+	 						System.err.println("wrong signal");
+	 					}
+	 				} else {
+	 					System.err.println("wrong object");
+	 				}
+					duplicationID.add(ptr);
+					ptr = (ptr+1) % numOfWorker;
+				}
+				Host[] hosts = fromIDtoHost(duplicationID);
  				InputSplit thisSplit = new FileInputSplit(splitFilename, 0, bytesPerSplit, hosts);
  				this.inputSplits.add(thisSplit);
-				ptr = (ptr+1) % numOfWorker; 
  			}
  			if (remainingBytes > 0) {
  				String splitFilename = job.getID() + "_" + numSplits + "_" + file.getName();
- 				ObjectOutputStream oos = toWorkers.get(ptr);
- 				ObjectInputStream ois = fromWorkers.get(ptr);
-				oos.writeObject(new Signal(SigNum.SEND_SPLIT));
- 				oos.writeObject(splitFilename);
- 				readWrite(inputFile, oos, remainingBytes);
-				oos.writeObject(new Signal(SigNum.SEND_SPLIT_COMPLETED));
-				Object obj = ois.readObject();
- 				if(obj instanceof Signal) {
- 					Signal sig = (Signal)obj;
- 					if(sig.getSignal() != SigNum.SPLIT_RECEIVED) {
- 						System.err.println("wrong signal");
- 					}
- 				} else {
- 					System.err.println("wrong object");
+ 				Set<Integer> duplicationID = new HashSet<Integer>(); 
+ 				for(int dup = 0; dup < numOfDuplication; dup++) {
+ 					if(duplicationID.contains(ptr))
+						continue;
+	 				ObjectOutputStream oos = toWorkers.get(ptr);
+	 				ObjectInputStream ois = fromWorkers.get(ptr);
+					oos.writeObject(new Signal(SigNum.SEND_SPLIT));
+	 				oos.writeObject(splitFilename);
+	 				readWrite(inputFile, oos, remainingBytes);
+					oos.writeObject(new Signal(SigNum.SEND_SPLIT_COMPLETED));
+					Object obj = ois.readObject();
+	 				if(obj instanceof Signal) {
+	 					Signal sig = (Signal)obj;
+	 					if(sig.getSignal() != SigNum.SPLIT_RECEIVED) {
+	 						System.err.println("wrong signal");
+	 					}
+	 				} else {
+	 					System.err.println("wrong object");
+	 				}
+	 				duplicationID.add(ptr);
+					ptr = (ptr+1) % numOfWorker;
  				}
- 				Host[] hosts = new Host[]{this.workerHosts.get(ptr)};
+ 				Host[] hosts = fromIDtoHost(duplicationID);
  				InputSplit thisSplit = new FileInputSplit(splitFilename, 0, remainingBytes, hosts);
  				this.inputSplits.add(thisSplit);
-				ptr = (ptr+1) % numOfWorker;
  			}
 			
 			inputFile.close();
@@ -177,4 +193,13 @@ public class JobClient {
  			oos.reset();
  		}
  	}
+	
+	private Host[] fromIDtoHost(Set<Integer> duplicationID) {
+		Host[] hosts = new Host[duplicationID.size()];
+		int i = 0;
+		for(Integer id : duplicationID) {
+			hosts[i++] = this.workerHosts.get(id);
+		}
+		return hosts;
+	}
 }
