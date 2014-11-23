@@ -44,9 +44,7 @@ public class TaskTracker extends Thread {
 
 	public TaskTracker(String ipAddress) throws Exception {
 		clearDirectories();
-		new File(JobTracker.MAPIN_DIR).mkdirs();
-		new File(JobTracker.MAPOUT_DIR).mkdirs();
-		new File(JobTracker.REDUCEIN_DIR).mkdirs();
+		createDirectories();
 
 		nextClientID = 0;
 		nextWorkerID = 0;
@@ -78,6 +76,12 @@ public class TaskTracker extends Thread {
 		deleteDirectory(new File(JobTracker.MAPIN_DIR));
 		deleteDirectory(new File(JobTracker.MAPOUT_DIR));
 		deleteDirectory(new File(JobTracker.REDUCEIN_DIR));
+	}
+	
+	private void createDirectories() {
+		new File(JobTracker.MAPIN_DIR).mkdirs();
+		new File(JobTracker.MAPOUT_DIR).mkdirs();
+		new File(JobTracker.REDUCEIN_DIR).mkdirs();
 		
 		deleteDirOnExit(new File(JobTracker.MAPIN_DIR));
 		deleteDirOnExit(new File(JobTracker.MAPOUT_DIR));
