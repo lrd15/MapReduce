@@ -64,9 +64,10 @@ public class JobTracker extends Thread {
         workerListener.start();
         
         // Start a separate thread to check if each worker is alive
-        HeartbeatThread heartbeatThread = new HeartbeatThread();
-        heartbeatThread.start();
-        System.out.println("Heartbeat thread started.");
+//        HeartbeatThread heartbeatThread = new HeartbeatThread();
+//        heartbeatThread.start();
+//        System.out.println("Heartbeat thread started.");
+        System.out.println("Job Tracker started.");
         
         while (running) {
 //        	if (jobMap.size() > 0)
@@ -254,7 +255,7 @@ public class JobTracker extends Thread {
 			wh.writeObject(getJob(jobID));
 			wh.writeObject(split.getInputSplit());
 		} catch (IOException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			return false;
 		}
         split.setJobState(JobState.IN_PROGRESS);
@@ -272,7 +273,7 @@ public class JobTracker extends Thread {
         	wh.writeObject(getJob(jobID));
 			wh.writeObject(partition);
 		} catch (IOException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			return false;
 		}
         partition.setJobState(JobState.IN_PROGRESS);
@@ -404,32 +405,32 @@ public class JobTracker extends Thread {
     }
 
     // Check whether workers are alive
-    private class HeartbeatThread extends Thread {
-        @Override
-        public void run() {
-            while (running) {
-//            	System.out.println("Worker handler list size = " + workerHandlerList.size());
-                for (int i = 0; i < workerHandlerList.size(); i++) {
-                	WorkerHandler wh = workerHandlerList.get(i);
-//                	System.out.print("Worker handler #" + wh.getID() + " is ");
-//                	if (wh.alive())
-//                		System.out.println("alive.");
-//                	else
-//                		System.out.println("not alive.");
-                    if (!wh.alive()) {
-                        // Worker Failure
-                    	System.out.println("Worker (" + wh.getSocket().getInetAddress() + ") failed.");
-                    	workerHandlerList.remove(i--);
-                    }
-                }
-                try {
-                    Thread.sleep(Configuration.TIMEOUT);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
+//    private class HeartbeatThread extends Thread {
+//        @Override
+//        public void run() {
+//            while (running) {
+////            	System.out.println("Worker handler list size = " + workerHandlerList.size());
+//                for (int i = 0; i < workerHandlerList.size(); i++) {
+//                	WorkerHandler wh = workerHandlerList.get(i);
+////                	System.out.print("Worker handler #" + wh.getID() + " is ");
+////                	if (wh.alive())
+////                		System.out.println("alive.");
+////                	else
+////                		System.out.println("not alive.");
+//                    if (!wh.alive()) {
+//                        // Worker Failure
+//                    	System.out.println("Worker (" + wh.getSocket().getInetAddress() + ") failed.");
+//                    	workerHandlerList.remove(i--);
+//                    }
+//                }
+//                try {
+//                    Thread.sleep(Configuration.TIMEOUT);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//    }
 
     private class ClientListener extends Thread {
         @Override
@@ -444,7 +445,7 @@ public class JobTracker extends Thread {
                     System.out.println("New client connected: " + socket.getRemoteSocketAddress());
                 } catch (IOException e) {
                     System.err.println("Failed to connect client: " + socket.getRemoteSocketAddress());
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 }
             }
         }
@@ -463,7 +464,7 @@ public class JobTracker extends Thread {
                     System.out.println("New worker connected: " + socket.getRemoteSocketAddress());
                 } catch (IOException e) {
                     System.err.println("Failed to connect worker: " + socket.getRemoteSocketAddress());
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 }
             }
         }

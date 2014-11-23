@@ -192,13 +192,13 @@ public class TaskTracker extends Thread {
 				filenames[i] = outputFilenames[i];
 			}
 		} catch (InstantiationException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			return false;
 		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			return false;
 		} catch (IOException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			return false;
 		}
 		return true;
@@ -228,13 +228,13 @@ public class TaskTracker extends Thread {
 			Reducer reducer = (Reducer) job.getReducerClass().newInstance();
 			reducer.run(reduceContext);
 		} catch (InstantiationException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			return false;
 		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			return false;
 		} catch (IOException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			return false;
 		}
 		return true;
@@ -312,7 +312,7 @@ public class TaskTracker extends Thread {
 	                }
 	                socket.close();
 	            } catch (Exception e) {
-	                e.printStackTrace();
+//	                e.printStackTrace();
 	                return false;
 	            }
 	        }
@@ -377,7 +377,7 @@ public class TaskTracker extends Thread {
 				} catch (IOException e) {
 					System.err.println("Failed to connect client: "
 							+ socket.getRemoteSocketAddress());
-					e.printStackTrace();
+//					e.printStackTrace();
 				}
 			}
 		}
@@ -399,7 +399,7 @@ public class TaskTracker extends Thread {
 				} catch (IOException e) {
 					System.err.println("Failed to connect worker (reducer): "
 							+ socket.getRemoteSocketAddress());
-					e.printStackTrace();
+//					e.printStackTrace();
 				}
 			}
 		}
