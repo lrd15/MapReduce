@@ -78,6 +78,16 @@ public class TaskTracker extends Thread {
 		deleteDirectory(new File(JobTracker.MAPIN_DIR));
 		deleteDirectory(new File(JobTracker.MAPOUT_DIR));
 		deleteDirectory(new File(JobTracker.REDUCEIN_DIR));
+		
+		deleteDirOnExit(new File(JobTracker.MAPIN_DIR));
+		deleteDirOnExit(new File(JobTracker.MAPOUT_DIR));
+		deleteDirOnExit(new File(JobTracker.REDUCEIN_DIR));
+	}
+	
+	public void deleteDirOnExit(File dir) {
+		for (File file : dir.listFiles())
+			file.deleteOnExit();
+		dir.deleteOnExit();
 	}
 	
 	public boolean deleteDirectory(File dir) {
