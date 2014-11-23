@@ -58,7 +58,7 @@ public class WorkerHandler extends Thread {
                             alive = true;
                             break;
                         case MAP_COMPLETED:
-                        	System.out.println("Received MAP_COMPLETED signal.");
+                        	System.out.println("Received MAP_COMPLETED signal (Job = " + jobID + ", SplitID = " + idx + ").");
                             String[] filenames = (String[])fromWorker.readObject();
 //                            System.out.println("Received " + filenames.length + " intermediate files.");
                             mapJob = master.getMapJob(jobID);
@@ -77,7 +77,7 @@ public class WorkerHandler extends Thread {
                                 master.migrate(mapJob);
                             break;
                         case REDUCE_COMPLETED:
-                        	System.out.println("Received REDUCE_COMPLETED signal.");
+                        	System.out.println("Received REDUCE_COMPLETED signal (Job = " + jobID + ", PartitionID = " + idx + ").");
                             ReduceJob reduceJob = master.getReduceJob(jobID);
                             ReducePartition partition = reduceJob.getPartition(idx);
                             partition.setJobState(JobState.COMPLETED);
@@ -90,14 +90,14 @@ public class WorkerHandler extends Thread {
                             }
                             break;
                         case MAP_FAILED:
-                        	System.out.println("Received MAP_FAILED signal.");
+                        	System.out.println("Received MAP_FAILED signal (Job = " + jobID + ", SplitID = " + idx + ").");
                         	mapJob = master.getMapJob(jobID);
                             split = mapJob.getSplit(idx);
                             split.setJobState(JobState.IDLE);
                             setWorkerState(WorkerState.IDLE);
                             break;
                         case REDUCE_FAILED:
-                        	System.out.println("Received REDUCE_FAILED signal.");
+                        	System.out.println("Received REDUCE_FAILED signal (Job = " + jobID + ", PartitionID = " + idx + ").");
                         	master.fallback(jobID);
                         	setWorkerState(WorkerState.IDLE);
                         	break;
