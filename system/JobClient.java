@@ -118,6 +118,7 @@ public class JobClient {
 				for(int dup = 0; dup < numOfDuplication; dup++) {
 					if(duplicationID.contains(ptr))
 						continue;
+					inputFile.seek(spl*bytesPerSplit);
 					ObjectOutputStream oos = toWorkers.get(ptr);
 	 				ObjectInputStream ois = fromWorkers.get(ptr);
 					oos.writeObject(new Signal(SigNum.SEND_SPLIT));
@@ -157,6 +158,7 @@ public class JobClient {
  				for(int dup = 0; dup < numOfDuplication; dup++) {
  					if(duplicationID.contains(ptr))
 						continue;
+ 					inputFile.seek(numSplits*bytesPerSplit);
 	 				ObjectOutputStream oos = toWorkers.get(ptr);
 	 				ObjectInputStream ois = fromWorkers.get(ptr);
 					oos.writeObject(new Signal(SigNum.SEND_SPLIT));
