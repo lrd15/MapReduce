@@ -95,9 +95,10 @@ public class TaskTracker extends Thread {
 	}
 	
 	public boolean deleteDirectory(File dir) {
-		for (File file : dir.listFiles())
-			if (!file.delete())
-				return false;
+		if (dir.listFiles() != null)
+			for (File file : dir.listFiles())
+				if (!file.delete())
+					return false;
 		return dir.delete();
 	}
 
