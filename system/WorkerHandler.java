@@ -50,6 +50,8 @@ public class WorkerHandler extends Thread {
                 Object obj = fromWorker.readObject();
                 if (obj instanceof Signal) {
                     Signal sig = (Signal)obj;
+                    MapJob mapJob = null;
+                    MapJobSplit split = null;
                     switch (sig.getSignal()) {
                         case HEARTBEAT:
 //                        	System.out.println("Received heartbeat.");
@@ -59,8 +61,8 @@ public class WorkerHandler extends Thread {
                         	System.out.println("Received MAP_COMPLETED signal.");
                             String[] filenames = (String[])fromWorker.readObject();
                             System.out.println("Received " + filenames.length + " intermediate files.");
-                            MapJob mapJob = master.getMapJob(jobID);
-                            MapJobSplit split = mapJob.getSplit(idx);
+                            mapJob = master.getMapJob(jobID);
+                            split = mapJob.getSplit(idx);
                             split.setJobState(JobState.COMPLETED);
                             setWorkerState(WorkerState.IDLE);
                             if (isIdle())
@@ -86,6 +88,18 @@ public class WorkerHandler extends Thread {
                                 master.removeJob(reduceJob.getID());
                             }
                             break;
+                        case MAP_FAILED:
+                        	System.out.println("Received MAP_FAILED signal.");
+                        	mapJob = master.getMapJob(jobID);
+                            split = mapJob.getSplit(idx);
+                            split.setJobState(JobState.IDLE);
+                            setWorkerState(WorkerState.IDLE);
+                            break;
+                        case REDUCE_FAILED:
+                        	System.out.println("Received REDUCE_FAILED signal.");
+                        	master.fallback(jobID);
+                        	setWorkerState(WorkerState.IDLE);
+                        	break;
                         default:
                         	System.out.println("Unexpected signal received: " + sig.getSignal());
                         	break;
